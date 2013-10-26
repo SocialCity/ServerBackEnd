@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.7.0_11"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/mongo-2.10.1.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jdo-api-3.0.1.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jexcelapi/jxl.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/google-gson-2.2.4/gson-2.2.4.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/servlet-api-3.0.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-xml-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-webapp-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-util-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-servlets-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-servlet-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-server-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-security-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-rewrite-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-proxy-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-plus-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-jndi-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-jmx-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-jaas-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-io-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-http-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-deploy-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-continuation-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-client-9.0.6.v20130930.jar"/>
+	<classpathentry kind="lib" path="/home/fusian/workspace/4YP-SocialCity/jetty-distribution-9.0.6.v20130930/lib/jetty-annotations-9.0.6.v20130930.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,6 +1,7 @@
 package com.SocialCity.DataParsers;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import jxl.Sheet;
@@ -23,9 +24,20 @@ public class ExcelParsing {
 		String housePrice;
 		DBCollection coll = null;
 		DBCollection collBorough = null;
+		String name;
+		FileWriter writeW = null;
+		FileWriter writeB = null;
+		try {
+			writeW = new FileWriter(new File("resources/WardsToCodes.txt"));
+			writeB = new FileWriter(new File("resources/BoroughsToCodes.txt"));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
 		
 		try {//set up file reader and databases
 			Workbook workbook = Workbook.getWorkbook(new File("resources/ward-profiles-excel-version.xls"));
+
 			sheet = workbook.getSheet(1); 
 			mongoClient = new MongoClient("localhost");
 			mongoClient.dropDatabase("areas");
@@ -45,7 +57,11 @@ public class ExcelParsing {
 			SocialFactors sF = new SocialFactors(sheet.getCell(1, i).getContents());
 			
 			sF.setCrimeRate(Double.parseDouble(sheet.getCell(55, i).getContents()));
-			
+			name = sheet.getCell(0, i).getContents();
+			if (name.contains("-")) {
+				name = name.substring(name.indexOf("-") + 2);
+			}
+			System.out.println(name);
 			housePrice = (sheet.getCell(26,i).getContents()).substring(3);
 			housePrice = housePrice.replace(",", "");
 			sF.setHousePrice(Double.parseDouble(housePrice));
@@ -61,17 +77,41 @@ public class ExcelParsing {
 			
 			if (sF.getLocation().get(0).length() == 6) {//checks if location is a ward
 				coll.insert(sF.getDBObject());
+				try {
+					writeW.write(name + "," + sF.getLocation().get(0)+"\n");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 			else if (sF.getLocation().get(0).equals("00AA")) {//city of london borough must be both ward and borough
 				coll.insert(sF.getDBObject());
 				collBorough.insert(sF.getDBObject());
+				try {
+					writeW.write(name + "," + sF.getLocation().get(0)+"\n");
+					writeB.write(name + "," + sF.getLocation().get(0)+"\n");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 			else if (sF.getLocation().get(0).length() == 4){//checks if locale is a borough
 				collBorough.insert(sF.getDBObject());
-				//System.out.println("heyo");
+				try {
+					writeB.write(name + "," + sF.getLocation().get(0)+"\n");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				System.out.println("heyo");
 			}
 			//System.out.println(sF.getDBObject());
 		}
+		try {
+			writeW.close();
+			writeB.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	//gets a map of names to ward/borough codes.

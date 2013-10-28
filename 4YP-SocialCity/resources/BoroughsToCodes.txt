@@ -1,0 +1,33 @@
+City of London,00AA
+Barking and Dagenham,00AB
+Barnet,00AC
+Bexley,00AD
+Brent,00AE
+Bromley,00AF
+Camden,00AG
+Croydon,00AH
+Ealing,00AJ
+Enfield,00AK
+Greenwich,00AL
+Hackney,00AM
+Hammersmith and Fulham,00AN
+Haringey,00AP
+Harrow,00AQ
+Havering,00AR
+Hillingdon,00AS
+Hounslow,00AT
+Islington,00AU
+Kensington and Chelsea,00AW
+Kingston upon Thames,00AX
+Lambeth,00AY
+Lewisham,00AZ
+Merton,00BA
+Newham,00BB
+Redbridge,00BC
+Richmond upon Thames,00BD
+Southwark,00BE
+Sutton,00BF
+Tower Hamlets,00BG
+Waltham Forest,00BH
+Wandsworth,00BJ
+Westminster,00BK

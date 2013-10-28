@@ -11,6 +11,8 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import com.SocialCity.DataParsers.ExcelParsing;
+
 //Simple URL parse simulating a REST service. Following URL patterns accepted:
 	// -http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(T)OrBoroughs(F)
 public class RequestHandler extends AbstractHandler {
@@ -40,10 +42,12 @@ public class RequestHandler extends AbstractHandler {
 	//Main to start server
 	public static void main(String[] args) throws Exception
 	{
-		Server server = new Server(8080);
+		/*Server server = new Server(8080);
 		server.setHandler(new RequestHandler());
 		
 		server.start();
-		server.join();
+		server.join();*/
+		
+		new ExcelParsing().parse();
 	}
 }

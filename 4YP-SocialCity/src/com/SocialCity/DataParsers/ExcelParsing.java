@@ -25,14 +25,6 @@ public class ExcelParsing {
 		DBCollection coll = null;
 		DBCollection collBorough = null;
 		String name;
-		FileWriter writeW = null;
-		FileWriter writeB = null;
-		try {
-			writeW = new FileWriter(new File("resources/WardsToCodes.txt"));
-			writeB = new FileWriter(new File("resources/BoroughsToCodes.txt"));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
 
 		
 		try {//set up file reader and databases
@@ -77,39 +69,16 @@ public class ExcelParsing {
 			
 			if (sF.getLocation().get(0).length() == 6) {//checks if location is a ward
 				coll.insert(sF.getDBObject());
-				try {
-					writeW.write(name + "," + sF.getLocation().get(0)+"\n");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 			}
 			else if (sF.getLocation().get(0).equals("00AA")) {//city of london borough must be both ward and borough
 				coll.insert(sF.getDBObject());
 				collBorough.insert(sF.getDBObject());
-				try {
-					writeW.write(name + "," + sF.getLocation().get(0)+"\n");
-					writeB.write(name + "," + sF.getLocation().get(0)+"\n");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 			}
 			else if (sF.getLocation().get(0).length() == 4){//checks if locale is a borough
 				collBorough.insert(sF.getDBObject());
-				try {
-					writeB.write(name + "," + sF.getLocation().get(0)+"\n");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 				System.out.println("heyo");
 			}
 			//System.out.println(sF.getDBObject());
-		}
-		try {
-			writeW.close();
-			writeB.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 
 	}

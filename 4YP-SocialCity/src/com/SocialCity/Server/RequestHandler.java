@@ -42,12 +42,12 @@ public class RequestHandler extends AbstractHandler {
 	//Main to start server
 	public static void main(String[] args) throws Exception
 	{
-		/*Server server = new Server(8080);
+		Server server = new Server(8080);
 		server.setHandler(new RequestHandler());
 		
 		server.start();
-		server.join();*/
+		server.join();
 		
-		new ExcelParsing().parse();
+		///new ExcelParsing().parse();
 	}
 }

@@ -34,13 +34,16 @@ public class BoundaryMap {
 				if (newSegment) {
 					newSegment = false;
 					subject = line.replace("\n", "");
-					System.out.println(subject);
+					//System.out.println(subject);
 				}
 				else if (!line.equals("---")) {
 					neighbours.add(line.replace("\n",""));
 				}
 				else if (line.equals("---")) {
 					boundaryMap.put(subject, neighbours);
+					//System.out.println(subject);
+					//System.out.println(neighbours);
+					//System.out.println("------");
 					neighbours = new ArrayList<String>();
 					newSegment = true;
 				}

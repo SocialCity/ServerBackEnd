@@ -16,6 +16,8 @@ import com.mongodb.MongoClient;
 //Forms any query responses and returns the JSON of it
 public class ResponseMaker {
 
+	private double factorConstant = 0.25;
+	
 	public String oneFactor(int factorNumber, boolean useWards) {
 		
 		MongoClient mongoClient;
@@ -52,6 +54,7 @@ public class ResponseMaker {
 			while(locales.hasNext()){//go through every location
 				sF = new SocialFactors(locales.next());
 				if (!(checked.contains(sF.getLocation().get(0)))) {//make sure location hasnt been checked yet
+					//System.out.println("everybody gets one");
 					neighbours = nameMap.get(sF.getLocation().get(0));
 					tempChecked.addAll(neighbours);//add bordering locales for checking
 					while (recheck) {//means locations where combined and new neighbours need to be checked
@@ -65,6 +68,7 @@ public class ResponseMaker {
 								//check if the two locations need to be combined
 								if (combine(sF, friend, factorNumber)){
 									recheck = true;
+									//System.out.println("here?");
 									//add new neighbours to list to check next iteration
 									toCheck.addAll(nameMap.get(friend.getLocation().get(0)));
 								}
@@ -99,51 +103,72 @@ public class ResponseMaker {
 		boolean combined = false;
 		
 		switch (factorNumber) {
-		case 0: if (sF.getCrimeRate()*0.9 < friend.getCrimeRate() || sF.getCrimeRate() * 1.1 > friend.getCrimeRate() || 
-						friend.getCrimeRate()*0.9 < sF.getCrimeRate() || friend.getCrimeRate() * 1.1 > sF.getCrimeRate()){
+		case 0: if ((sF.getCrimeRate()*(1-factorConstant) < friend.getCrimeRate()) && (sF.getCrimeRate() > friend.getCrimeRate()) || 
+						(sF.getCrimeRate() * (1+factorConstant) > friend.getCrimeRate()) && (sF.getCrimeRate() < friend.getCrimeRate())  || 
+						(friend.getCrimeRate()*(1-factorConstant) < sF.getCrimeRate()) && (sF.getCrimeRate() < friend.getCrimeRate()) || 
+						(friend.getCrimeRate() * (1+factorConstant) > sF.getCrimeRate()) && (sF.getCrimeRate() > friend.getCrimeRate())){
 					sF.combineLocations(friend);
 					combined = true;
 				}
 				break;
-		case 1: if (sF.getHousePrice()*0.9 < friend.getHousePrice() || sF.getHousePrice() * 1.1 > friend.getHousePrice() || 
-						friend.getHousePrice()*0.9 < sF.getHousePrice() || friend.getHousePrice() * 1.1 > sF.getHousePrice()){
-					sF.combineLocations(friend);
-					combined = true;
-					//System.out.println("shitters");
-				}
-				break;
-		case 2: if (sF.getEducationRating()*0.9 < friend.getEducationRating() || sF.getEducationRating() * 1.1 > friend.getEducationRating() || 
-						friend.getEducationRating()*0.9 < sF.getEducationRating() || friend.getEducationRating() * 1.1 > sF.getEducationRating()){
-					sF.combineLocations(friend);
-					combined = true;
-				}
-				break;
-		case 3: if (sF.getTransportRating()*0.9 < friend.getTransportRating() || sF.getTransportRating() * 1.1 > friend.getTransportRating() || 
-						friend.getTransportRating()*0.9 < sF.getTransportRating() || friend.getTransportRating() * 1.1 > sF.getTransportRating()){
+		case 1: if ((sF.getHousePrice()*(1-factorConstant) < friend.getHousePrice()) && (sF.getHousePrice() > friend.getHousePrice()) || 
+						(sF.getHousePrice() * (1+factorConstant) > friend.getHousePrice()) && (sF.getHousePrice() < friend.getHousePrice())  || 
+						(friend.getHousePrice()*(1-factorConstant) < sF.getHousePrice()) && (sF.getHousePrice() < friend.getHousePrice()) || 
+						(friend.getHousePrice() * (1+factorConstant) > sF.getHousePrice()) && (sF.getHousePrice() > friend.getHousePrice())){
+					
+					System.out.println(sF.getLocation().get(0));
+					System.out.println(friend.getLocation().get(0));
+					System.out.println(sF.getHousePrice());
+					System.out.println(friend.getHousePrice());
+					System.out.println("-----");
 					sF.combineLocations(friend);
 					combined = true;
 				}
 				break;
-		case 4: if (sF.getMeanAge()*0.9 < friend.getMeanAge() || sF.getMeanAge() * 1.1 > friend.getMeanAge() || 
-						friend.getMeanAge()*0.9 < sF.getMeanAge() || friend.getMeanAge() * 1.1 > sF.getMeanAge()){
+		case 2: if ((sF.getEducationRating()*(1-factorConstant) < friend.getEducationRating()) && (sF.getEducationRating() > friend.getEducationRating()) || 
+						(sF.getEducationRating() * (1+factorConstant) > friend.getEducationRating()) && (sF.getEducationRating() < friend.getEducationRating())  || 
+						(friend.getEducationRating()*(1-factorConstant) < sF.getEducationRating()) && (sF.getEducationRating() < friend.getEducationRating()) || 
+						(friend.getEducationRating() * (1+factorConstant) > sF.getEducationRating()) && (sF.getEducationRating() > friend.getEducationRating())){
 					sF.combineLocations(friend);
 					combined = true;
 				}
 				break;
-		case 5: if (sF.getDrugRate()*0.9 < friend.getDrugRate() || sF.getDrugRate() * 1.1 > friend.getDrugRate() || 
-						friend.getDrugRate()*0.9 < sF.getDrugRate() || friend.getDrugRate() * 1.1 > sF.getDrugRate()){
+		case 3: if ((sF.getTransportRating()*(1-factorConstant) < friend.getTransportRating()) && (sF.getTransportRating() > friend.getTransportRating()) || 
+						(sF.getTransportRating() * (1+factorConstant) > friend.getTransportRating()) && (sF.getTransportRating() < friend.getTransportRating())  || 
+						(friend.getTransportRating()*(1-factorConstant) < sF.getTransportRating()) && (sF.getTransportRating() < friend.getTransportRating()) || 
+						(friend.getTransportRating() * (1+factorConstant) > sF.getTransportRating()) && (sF.getTransportRating() > friend.getTransportRating())){
 					sF.combineLocations(friend);
 					combined = true;
 				}
 				break;
-		case 6: if (sF.getEmploymentRate()*0.9 < friend.getEmploymentRate() || sF.getEmploymentRate() * 1.1 > friend.getEmploymentRate() || 
-						friend.getEmploymentRate()*0.9 < sF.getEmploymentRate() || friend.getEmploymentRate() * 1.1 > sF.getEmploymentRate()){
+		case 4: if ((sF.getMeanAge()*(1-factorConstant) < friend.getMeanAge()) && (sF.getMeanAge() > friend.getMeanAge()) || 
+						(sF.getMeanAge() * (1+factorConstant) > friend.getMeanAge()) && (sF.getMeanAge() < friend.getMeanAge())  || 
+						(friend.getMeanAge()*(1-factorConstant) < sF.getMeanAge()) && (sF.getMeanAge() < friend.getMeanAge()) || 
+						(friend.getMeanAge() * (1+factorConstant) > sF.getMeanAge()) && (sF.getMeanAge() > friend.getMeanAge())){
 					sF.combineLocations(friend);
 					combined = true;
 				}
 				break;
-		case 7: if (sF.getVoteTurnout()*0.9 < friend.getVoteTurnout() || sF.getVoteTurnout() * 1.1 > friend.getVoteTurnout() || 
-						friend.getVoteTurnout()*0.9 < sF.getVoteTurnout() || friend.getVoteTurnout() * 1.1 > sF.getVoteTurnout()){
+		case 5: if ((sF.getDrugRate()*(1-factorConstant) < friend.getDrugRate()) && (sF.getDrugRate() > friend.getDrugRate()) || 
+						(sF.getDrugRate() * (1+factorConstant) > friend.getDrugRate()) && (sF.getDrugRate() < friend.getDrugRate())  || 
+						(friend.getDrugRate()*(1-factorConstant) < sF.getDrugRate()) && (sF.getDrugRate() < friend.getDrugRate()) || 
+						(friend.getDrugRate() * (1+factorConstant) > sF.getDrugRate()) && (sF.getDrugRate() > friend.getDrugRate())){
+					sF.combineLocations(friend);
+					combined = true;
+				}
+				break;
+		case 6: if ((sF.getEmploymentRate()*(1-factorConstant) < friend.getEmploymentRate()) && (sF.getEmploymentRate() > friend.getEmploymentRate()) || 
+						(sF.getEmploymentRate() * (1+factorConstant) > friend.getEmploymentRate()) && (sF.getEmploymentRate() < friend.getEmploymentRate())  || 
+						(friend.getEmploymentRate()*(1-factorConstant) < sF.getEmploymentRate()) && (sF.getEmploymentRate() < friend.getEmploymentRate()) || 
+						(friend.getEmploymentRate() * (1+factorConstant) > sF.getEmploymentRate()) && (sF.getEmploymentRate() > friend.getEmploymentRate())){
+					sF.combineLocations(friend);
+					combined = true;
+				}
+				break;
+		case 7: if ((sF.getVoteTurnout()*(1-factorConstant) < friend.getVoteTurnout()) && (sF.getVoteTurnout() > friend.getVoteTurnout()) || 
+						(sF.getVoteTurnout() * (1+factorConstant) > friend.getVoteTurnout()) && (sF.getVoteTurnout() < friend.getVoteTurnout())  || 
+						(friend.getVoteTurnout()*(1-factorConstant) < sF.getVoteTurnout()) && (sF.getVoteTurnout() < friend.getVoteTurnout()) || 
+						(friend.getVoteTurnout() * (1+factorConstant) > sF.getVoteTurnout()) && (sF.getVoteTurnout() > friend.getVoteTurnout())){
 					sF.combineLocations(friend);
 					combined = true;
 				}

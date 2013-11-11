@@ -1,5 +1,7 @@
 package com.SocialCity.Server;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -12,6 +14,13 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import com.SocialCity.DataParsers.ExcelParsing;
+import com.SocialCity.TwitterAnalysis.TweetByArea;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 
 //Simple URL parse simulating a REST service. Following URL patterns accepted:
 	// -http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(T)OrBoroughs(F)
@@ -36,7 +45,7 @@ public class RequestHandler extends AbstractHandler {
 			}
 		}
 		catch (Exception e) {
-			response.getWriter().println("<h1>404 YOU JIZZ BAGEL</h1>");
+			response.getWriter().println("<h1>404</h1>");
 		}
 	}
 	//Main to start server
@@ -47,7 +56,8 @@ public class RequestHandler extends AbstractHandler {
 		
 		server.start();
 		server.join();
-		
+		//TweetByArea tBA = new TweetByArea();
+		//tBA.getTweetsForBorough("00AF");
 		///new ExcelParsing().parse();
 	}
 }

@@ -1,0 +1,1 @@
+{ "indexes" : [ { "v" : 1, "key" : { "_id" : 1 }, "ns" : "tweetInfo.hashTag", "name" : "_id_" } ] }

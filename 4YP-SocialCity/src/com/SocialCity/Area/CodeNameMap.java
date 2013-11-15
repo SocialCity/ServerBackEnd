@@ -10,26 +10,35 @@ import java.util.HashMap;
 public class CodeNameMap {
 	
 	HashMap<String, ArrayList<String>> codeNameMap;
+	HashMap<String, String> nameMap;
+	HashMap<String, String> codeMap;
 	
 	public CodeNameMap() {
 		codeNameMap = new HashMap<String, ArrayList<String>>();
 		makeMap();
+		nameMap = getBaseMap(false);
+		codeMap = getBaseMap(true);
 	}
 	
 	public ArrayList<String> getNames(String boroughCode) {
 		return codeNameMap.get(boroughCode);
 	}
+	
 	public String getName(String boroughCode) {
-		return getBaseMap().get(boroughCode);
+		return nameMap.get(boroughCode);
 	}	
 	
-	public HashMap<String, String> getBaseMap() {
+	public String getCode(String boroughName) {
+		return codeMap.get(boroughName);
+	}
+	
+	public HashMap<String, String> getBaseMap(boolean code) {
 		String boroughFile = "resources/BoroughsToCodes.txt";
 		String wardFile = "resources/WardsToCodes.txt";
 		HashMap <String, String>  map= new HashMap<String, String>();
 		try {
-			fillMap(boroughFile, map);
-			fillMap(wardFile, map);
+			fillMap(boroughFile, map, code);
+			fillMap(wardFile, map, code);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -41,7 +50,7 @@ public class CodeNameMap {
 	}
 	
 	private void makeMap() {
-		HashMap<String, String> map = getBaseMap();
+		HashMap<String, String> map = getBaseMap(false);
 		ArrayList<String> values;
 		String key;
 		
@@ -59,14 +68,15 @@ public class CodeNameMap {
 		}
 	}
 	
-	private void fillMap (String filePath,HashMap<String, String> map) throws IOException {
+	private void fillMap (String filePath,HashMap<String, String> map, boolean code) throws IOException {
 		String line = "";
 		String cvsSplitBy = ",";
 		BufferedReader br = null;
 		br = new BufferedReader(new FileReader(filePath));
 		while ((line = br.readLine()) != null) {
 			String[] entry = line.split(cvsSplitBy);
-			map.put(entry[1], entry[0]);
+			if (code) {map.put(entry[0], entry[1]);}
+			else {map.put(entry[1], entry[0]);}
 		}
 		br.close();
 	}

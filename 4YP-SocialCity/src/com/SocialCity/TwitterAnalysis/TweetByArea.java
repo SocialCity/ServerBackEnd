@@ -31,7 +31,6 @@ public class TweetByArea {
 		MongoClient mongoClient;
 		mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
-		db.createCollection("tweets", null);
 		DBCollection coll = null;
 		coll = db.getCollection("tweets");
 		

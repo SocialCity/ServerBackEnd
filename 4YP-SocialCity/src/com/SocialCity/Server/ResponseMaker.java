@@ -176,4 +176,24 @@ public class ResponseMaker {
 		}
 		return combined;
 	}
+
+	public String hashTags(String tag1, String tag2) throws UnknownHostException {
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "tweetInfo" );
+		DBCollection hashTagInfo = db.getCollection("tagInfo");
+		
+		
+		BasicDBObject query = new BasicDBObject("locations", new BasicDBObject("ward0", tag1));
+		SocialFactors tag1Factors = new SocialFactors(hashTagInfo.findOne(query));
+		
+		query = new BasicDBObject("locations", new BasicDBObject("ward0", tag2));
+		SocialFactors tag2Factors = new SocialFactors(hashTagInfo.findOne(query));
+		
+		ArrayList<SocialFactors> listOfData = new ArrayList<SocialFactors>();
+		listOfData.add(tag1Factors);
+		listOfData.add(tag2Factors);
+		
+		Gson gson = new Gson();
+		return gson.toJson(listOfData);
+	}
 }

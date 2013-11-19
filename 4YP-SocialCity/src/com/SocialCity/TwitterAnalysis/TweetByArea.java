@@ -37,14 +37,47 @@ public class TweetByArea {
 		System.out.println(name);
 		query = new BasicDBObject("place.name", name);
 		DBCursor tweets = coll.find(query);
-		System.out.println(tweets.count());
+		//System.out.println(tweets.count());
 		for (DBObject dbo : tweets) {
 			tweetText.add((String) dbo.get("text"));
-			System.out.println(dbo.get("text"));
+			//System.out.println(dbo.get("text"));
 		}
 
 		
 		return tweetText;
 	}
+	
+	public HashMap<String, Double> tweetProportion() throws UnknownHostException {
+		HashMap<String, String> nameMap = codeNameMap.getNameMap();
+		ArrayList<String> list;
+		HashMap<String, Double> tweetCount = new HashMap<String, Double>();
+		int total = 0;
+		
+		for (String key : nameMap.keySet()) {
+			if (key.length() == 4) {
+				list = getTweetsForBorough(key);
+				total = total + list.size();
+				tweetCount.put(key, (double) list.size());
+			}
+		}
+		
+		for (String key : tweetCount.keySet()) {
+			tweetCount.put(key, (tweetCount.get(key)/total));
+		}
+		
+		return tweetCount;
+	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+

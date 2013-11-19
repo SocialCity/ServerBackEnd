@@ -1,6 +1,7 @@
 package com.SocialCity.TwitterAnalysis;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -8,6 +9,7 @@ import java.util.regex.Pattern;
 
 import com.SocialCity.Area.CodeNameMap;
 import com.SocialCity.SocialFactor.SocialFactors;
+import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
@@ -29,6 +31,7 @@ public class HashTag {
 		DB db = mongoClient.getDB( "tweetInfo" );
 		DBCollection coll = null;
 		DBCollection sortedColl = null;
+		DBCollection tagList = null;
 		coll = db.getCollection("tweets");
 		
 
@@ -70,13 +73,34 @@ public class HashTag {
 		sortedColl = db.getCollection("topHashTags");
 		sortedColl.drop();
 		sortedColl = db.createCollection("topHashTags", null);
-		
+		tagList = db.getCollection("tagList");
+		tagList.drop();
+		tagList = db.createCollection("tagList", null);
+		BasicDBObject tag;
+		ArrayList<String> names = new ArrayList<String>();
 		while (dbC.hasNext()) {
-			sortedColl.insert(dbC.next());
+			tag = (BasicDBObject) dbC.next();
+			sortedColl.insert(tag);
+			names.add(tag.getString("hashtag"));
 		}
 		
+		tag = new BasicDBObject();
+		tag.put("tags", names);
+		tagList.insert(tag);
 		mongoClient.close();
 	} 
+	
+	public static String getTagList() throws UnknownHostException {
+		MongoClient mongoClient;
+		mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "tweetInfo" );
+		DBCollection coll = db.getCollection("tagList");
+		
+		ArrayList<String> names = (ArrayList<String>) ((BasicDBObject) coll.findOne()).get("tags");
+		
+		Gson gson = new Gson();
+		return gson.toJson(names);
+	}
 	
 	public static void tagLocationInfo() throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");

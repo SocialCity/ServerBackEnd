@@ -7,6 +7,7 @@ import java.util.HashSet;
 
 import com.SocialCity.Area.BoundaryMap;
 import com.SocialCity.SocialFactor.SocialFactors;
+import com.SocialCity.TwitterAnalysis.HashTag;
 import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -115,12 +116,6 @@ public class ResponseMaker {
 						(sF.getHousePrice() * (1+factorConstant) > friend.getHousePrice()) && (sF.getHousePrice() < friend.getHousePrice())  || 
 						(friend.getHousePrice()*(1-factorConstant) < sF.getHousePrice()) && (sF.getHousePrice() < friend.getHousePrice()) || 
 						(friend.getHousePrice() * (1+factorConstant) > sF.getHousePrice()) && (sF.getHousePrice() > friend.getHousePrice())){
-					
-					System.out.println(sF.getLocation().get(0));
-					System.out.println(friend.getLocation().get(0));
-					System.out.println(sF.getHousePrice());
-					System.out.println(friend.getHousePrice());
-					System.out.println("-----");
 					sF.combineLocations(friend);
 					combined = true;
 				}
@@ -172,7 +167,9 @@ public class ResponseMaker {
 					sF.combineLocations(friend);
 					combined = true;
 				}
-				break;						
+				break;
+		case 8: break;
+		
 		}
 		return combined;
 	}
@@ -195,5 +192,9 @@ public class ResponseMaker {
 		
 		Gson gson = new Gson();
 		return gson.toJson(listOfData);
+	}
+
+	public String hashTagList() throws UnknownHostException {
+			return HashTag.getTagList();
 	}
 }

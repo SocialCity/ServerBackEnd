@@ -24,9 +24,13 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 //Simple URL parse simulating a REST service. Following URL patterns accepted:
-	// -http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(T)OrBoroughs(F)
+	//-http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(T)OrBoroughs(F)
 	//-http://localhost:8080/hashTagFactors/tag1/tag2
+	//-http://localhost:8080/hashTagList
 public class RequestHandler extends AbstractHandler {
+	
+	private static ResponseMaker rM;
+	
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
 		response.setContentType("text/html;charset=utf-8");
@@ -40,11 +44,15 @@ public class RequestHandler extends AbstractHandler {
 					int factor = Integer.parseInt(paths[2]);
 					boolean useWards = Boolean.parseBoolean(paths[3]);
 					if (factor < 0 || factor > 7) {throw new Exception();}
-					reply = new ResponseMaker().oneFactor(factor, useWards);
+					reply = rM.oneFactor(factor, useWards);
 					response.getWriter().println(reply);
 					break;
 				case "hashTagFactors":
-					reply = new ResponseMaker().hashTags(paths[2], paths[3]);
+					reply = rM.hashTags(paths[2], paths[3]);
+					response.getWriter().println(reply);
+					break;
+				case "hashTagList":
+					reply = rM.hashTagList();
 					response.getWriter().println(reply);
 					break;
 				default: throw new Exception();
@@ -58,12 +66,16 @@ public class RequestHandler extends AbstractHandler {
 	//Main to start server
 	public static void main(String[] args) throws Exception
 	{
+		rM = new ResponseMaker();
 		Server server = new Server(8080);
 		server.setHandler(new RequestHandler());
 		
 		server.start();
 		server.join();
+		
+		//new ExcelParsing().parse();
 		//HashTag.topHashTags();
+		//System.out.println(HashTag.getTagList());
 		//HashTag.tagLocationInfo();
 	}
 }

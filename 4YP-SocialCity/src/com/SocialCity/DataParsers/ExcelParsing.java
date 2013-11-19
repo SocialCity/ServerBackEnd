@@ -3,12 +3,14 @@ package com.SocialCity.DataParsers;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
 import com.SocialCity.SocialFactor.SocialFactors;
+import com.SocialCity.TwitterAnalysis.TweetByArea;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
@@ -18,14 +20,14 @@ public class ExcelParsing {
 	public ExcelParsing() {}
 	
 	//DO NOT CALL THIS UNLESS YOU WANT TO DROP THE CURRENT DATABASE
-	public void parse() {
+	public void parse() throws UnknownHostException {
 		MongoClient mongoClient;
 		Sheet sheet = null;
 		String housePrice;
 		DBCollection coll = null;
 		DBCollection collBorough = null;
 		String name;
-
+		HashMap<String, Double> tweetCount = (new TweetByArea()).tweetProportion();
 		
 		try {//set up file reader and databases
 			Workbook workbook = Workbook.getWorkbook(new File("resources/ward-profiles-excel-version.xls"));
@@ -46,7 +48,8 @@ public class ExcelParsing {
 		} 
 		
 		for (int i=1; i<sheet.getRows()-3;i++) {//gets needed factors for every location
-			SocialFactors sF = new SocialFactors(sheet.getCell(1, i).getContents());
+			String code = sheet.getCell(1, i).getContents();
+			SocialFactors sF = new SocialFactors(code);
 			
 			sF.setCrimeRate(Double.parseDouble(sheet.getCell(55, i).getContents()));
 			name = sheet.getCell(0, i).getContents();
@@ -66,6 +69,7 @@ public class ExcelParsing {
 			sF.setDrugRate(Double.parseDouble(sheet.getCell(60, i).getContents()));
 			sF.setEmploymentRate(Double.parseDouble(sheet.getCell(22, i).getContents()));
 			sF.setVoteTurnout(Double.parseDouble(sheet.getCell(65, i).getContents()));
+			sF.setTweetProportion(tweetCount.get(code.substring(0, 4)));
 			
 			if (sF.getLocation().get(0).length() == 6) {//checks if location is a ward
 				coll.insert(sF.getDBObject());
@@ -76,7 +80,7 @@ public class ExcelParsing {
 			}
 			else if (sF.getLocation().get(0).length() == 4){//checks if locale is a borough
 				collBorough.insert(sF.getDBObject());
-				System.out.println("heyo");
+				//System.out.println("heyo");
 			}
 			//System.out.println(sF.getDBObject());
 		}

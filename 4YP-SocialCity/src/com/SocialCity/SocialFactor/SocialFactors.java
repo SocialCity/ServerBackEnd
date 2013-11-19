@@ -19,6 +19,8 @@ public class SocialFactors {
 	private double drugRate;
 	private double employmentRate;
 	private double voteTurnout;
+	
+	private double tweetProportion;
 
 	private Emotion sentiment;
 	static Gson gson = new Gson();
@@ -34,6 +36,7 @@ public class SocialFactors {
 		drugRate = -1;
 		employmentRate = -1;
 		voteTurnout = -1;
+		tweetProportion = -1;
 	}
 	
 	public static SocialFactors parseJSON(String location) {
@@ -50,6 +53,8 @@ public class SocialFactors {
 		drugRate = (double) readIn.get("drugRate");
 		employmentRate = (double) readIn.get("employmentRate");
 		voteTurnout = (double) readIn.get("voteTurnout");
+		tweetProportion = (double) readIn.get("tweetProportion");
+		
 		this.location = new ArrayList<String>();
 		BasicDBObject locations = (BasicDBObject) readIn.get("locations");
 		int i = 0;
@@ -64,11 +69,17 @@ public class SocialFactors {
 	public double getHousePrice(){return housePrice;}
 	public double getEducationRating(){return educationRating;}
 	public double getTransportRating(){return transportRating;}
+	public double getTweetProportion(){return tweetProportion;}
+	
 	public ArrayList<String> getLocation(){return location;}
 	public Emotion getSentiment(){return sentiment;}
 	
 	public void setCrimeRate(double crimeRate){
 		this.crimeRate = crimeRate;
+	}
+	
+	public void setTweetProportion (double tweetProportion) {
+		this.tweetProportion = tweetProportion;
 	}
 	
 	public void setHousePrice(double housePrice){
@@ -143,6 +154,14 @@ public class SocialFactors {
 		else if (factors.getVoteTurnout() != -1) {
 			voteTurnout= (voteTurnout+ factors.getVoteTurnout())/2;
 		}
+		
+		if ( tweetProportion == -1 ||
+				((location.get(0).substring(0, 4).equals(factors.getLocation().get(0).substring(0, 4))) && factors.getTweetProportion() != -1) ) {
+			tweetProportion = factors.getTweetProportion();
+		}
+		else if (factors.getTweetProportion() != -1) {
+			tweetProportion = (tweetProportion+ factors.getTweetProportion());
+		}
 
 		//sentiment.averageSentiments(factors.getSentiment());
 		location.addAll(factors.getLocation());
@@ -165,6 +184,7 @@ public class SocialFactors {
 		factors.append("employmentRate", employmentRate);
 		factors.append("drugRate", drugRate);
 		factors.append("voteTurnout", voteTurnout);
+		factors.append("tweetProportion", tweetProportion);
 		return factors;
 	}
 

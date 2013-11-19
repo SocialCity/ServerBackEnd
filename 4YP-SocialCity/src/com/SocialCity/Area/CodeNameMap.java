@@ -10,8 +10,8 @@ import java.util.HashMap;
 public class CodeNameMap {
 	
 	HashMap<String, ArrayList<String>> codeNameMap;
-	HashMap<String, String> nameMap;
-	HashMap<String, String> codeMap;
+	private HashMap<String, String> nameMap;
+	private HashMap<String, String> codeMap;
 	
 	public CodeNameMap() {
 		codeNameMap = new HashMap<String, ArrayList<String>>();
@@ -28,11 +28,15 @@ public class CodeNameMap {
 		return nameMap.get(boroughCode);
 	}	
 	
+	public HashMap<String,String> getNameMap() {
+		return nameMap;
+	}
+	
 	public String getCode(String boroughName) {
 		return codeMap.get(boroughName);
 	}
 	
-	public HashMap<String, String> getBaseMap(boolean code) {
+	private HashMap<String, String> getBaseMap(boolean code) {
 		String boroughFile = "resources/BoroughsToCodes.txt";
 		String wardFile = "resources/WardsToCodes.txt";
 		HashMap <String, String>  map= new HashMap<String, String>();

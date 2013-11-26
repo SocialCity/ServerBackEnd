@@ -8,6 +8,7 @@ import java.util.HashSet;
 import com.SocialCity.Area.BoundaryMap;
 import com.SocialCity.SocialFactor.SocialFactors;
 import com.SocialCity.TwitterAnalysis.HashTag;
+import com.SocialCity.TwitterAnalysis.TweetByArea;
 import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -196,5 +197,99 @@ public class ResponseMaker {
 
 	public String hashTagList() throws UnknownHostException {
 			return HashTag.getTagList();
+	}
+
+	public String devicesForBorough(String code) throws UnknownHostException {
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "deviceBreakdown" );
+		DBCollection coll;
+		coll = db.getCollection("devicesForBoroughs");
+		Gson gson = new Gson();
+		
+		BasicDBObject query = new BasicDBObject("borough", code);
+		
+		return gson.toJson(coll.find(query).next().toString());
+	}
+
+	public String getDevice() throws UnknownHostException {
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "deviceBreakdown" );
+		DBCollection coll = db.getCollection("deviceList");
+		Gson gson = new Gson();
+		return gson.toJson(coll.findOne().get("list"));
+	}
+
+	public String getDeviceFactors(String deviceName) throws UnknownHostException {
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "deviceBreakdown" );
+		DBCollection coll = db.getCollection("deviceFactors");
+		
+		BasicDBObject query = new BasicDBObject("locations", new BasicDBObject("ward0", deviceName));
+		
+		DBCursor d = coll.find();
+		while (d.hasNext()) {System.out.println(d.next());}
+		Gson gson = new Gson();
+		return gson.toJson(coll.find(query).next().toString());
+	}
+
+	public String getFactorList() {
+		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
+		
+		HashMap<String, String> entry = new HashMap<String, String>();
+		entry.put("id", "0");
+		entry.put("factor", "Crime Rate");
+		entry.put("measure", "Recorded offenses per 1000 people");
+		list.add(entry);
+		
+		entry = new HashMap<String, String>();
+		entry.put("id", "1");
+		entry.put("factor", "House Price");
+		entry.put("measure", "Pounds");
+		list.add(entry);
+		
+		entry = new HashMap<String, String>();
+		entry.put("id", "2");
+		entry.put("factor", "Education Rating");
+		entry.put("measure", "Percentage of people with at least level 4 qualifications");
+		list.add(entry);
+		
+		entry = new HashMap<String, String>();
+		entry.put("id", "3");
+		entry.put("factor", "Transport Rating");
+		entry.put("measure", "Average Public Transport Accessibility score");
+		list.add(entry);
+		
+		entry = new HashMap<String, String>();
+		entry.put("id", "4");
+		entry.put("factor", "Mean Age");
+		entry.put("measure", "Years");
+		list.add(entry);
+		
+		entry = new HashMap<String, String>();
+		entry.put("id", "5");
+		entry.put("factor", "Drug Rate");
+		entry.put("measure", "Estimated number of problem drug users (crack and or opiates) per 1000 of the population");
+		list.add(entry);
+		
+		entry = new HashMap<String, String>();
+		entry.put("id", "6");
+		entry.put("factor", "Employment Rate");
+		entry.put("measure", "Percentage of population in employment");
+		list.add(entry);
+		
+		entry = new HashMap<String, String>();
+		entry.put("id", "7");
+		entry.put("factor", "Vote Turnout");
+		entry.put("measure", "Percentage of voter turnout at mayoral elections");
+		list.add(entry);
+		
+		entry = new HashMap<String, String>();
+		entry.put("id", "8");
+		entry.put("factor", "Tweet Proportion");
+		entry.put("measure", "Ratio of tweets from borough compared to the whole of London");
+		list.add(entry);
+		
+		Gson gson = new Gson();
+		return gson.toJson(list);
 	}
 }

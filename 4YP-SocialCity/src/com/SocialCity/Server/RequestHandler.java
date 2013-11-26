@@ -27,6 +27,10 @@ import com.mongodb.MongoClient;
 	//-http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(T)OrBoroughs(F)
 	//-http://localhost:8080/hashTagFactors/tag1/tag2
 	//-http://localhost:8080/hashTagList
+	//-http://localhost:8080/devicesForBorough/boroughCode
+	//-http://localhost:8080/deviceList
+	//-http://localhost:8080/deviceFactor/device1
+	//-http://localhost:8080/factorList
 public class RequestHandler extends AbstractHandler {
 	
 	private static ResponseMaker rM;
@@ -55,6 +59,22 @@ public class RequestHandler extends AbstractHandler {
 					reply = rM.hashTagList();
 					response.getWriter().println(reply);
 					break;
+				case "devicesForBorough":
+					reply = rM.devicesForBorough(paths[2]);
+					response.getWriter().println(reply);
+					break;
+				case "deviceList":
+					reply = rM.getDevice();
+					response.getWriter().println(reply);
+					break;
+				case "deviceFactor":
+					reply = rM.getDeviceFactors(paths[2]);
+					response.getWriter().println(reply);
+					break;
+				case "factorList":
+					reply = rM.getFactorList();
+					response.getWriter().println(reply);
+					break;
 				default: throw new Exception();
 				
 			}
@@ -67,6 +87,7 @@ public class RequestHandler extends AbstractHandler {
 	public static void main(String[] args) throws Exception
 	{
 		rM = new ResponseMaker();
+		//rM.getDeviceFactors("foursquare");
 		Server server = new Server(8080);
 		server.setHandler(new RequestHandler());
 		
@@ -74,8 +95,20 @@ public class RequestHandler extends AbstractHandler {
 		server.join();
 		
 		//new ExcelParsing().parse();
-		//HashTag.topHashTags();
 		//System.out.println(HashTag.getTagList());
-		//HashTag.tagLocationInfo();
+		//new TweetByArea().createDeviceList();
+		//new TweetByArea().deviceBreakdown();
+		//new TweetByArea().deviceFactors();
+		/*BasicDBObject query = new BasicDBObject("source", "<a href=\"http://www.handmark.com\" rel=\"nofollow\">TweetCaster for iOS</a>");
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db2 = mongoClient.getDB( "deviceBreakdown" );
+		DBCollection deviceStore = db2.getCollection("deviceFactors");
+		
+		DBCursor result = deviceStore.find();
+		
+		while (result.hasNext()){
+			System.out.println(result.next());
+		}*/
+	
 	}
 }

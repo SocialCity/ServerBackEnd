@@ -7,7 +7,7 @@ import java.util.List;
 
 public class WordScore {
 	
-	private Double val = null;;
+	private Double val = null;
 	private Double active = null;
 	private Double image = null;
 	private String word = null;

@@ -76,10 +76,14 @@ public class TwitterAnalyser {
 	private WordScore analyse_token(String token){
 		//analyse individual word/token
 		
+		//is a matched word
 		if (map.containsKey(token)){
 			//word is in the map set, return the wordscore object held in the hashmap
 			return map.get(token);
 		}
+		//is a retweet indicator
+		//is a hastag
+		//is a noun
 		else
 			// no word in mapset, return invalid wordscore object
 			return new WordScore(token, -1.0, -1.0, -1.0);

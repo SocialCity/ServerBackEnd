@@ -11,6 +11,8 @@ public class WordScore {
 	private Double active = null;
 	private Double image = null;
 	private String word = null;
+	
+	private String W_Classification = null;
 
 	public WordScore(String word, Double val, Double active, Double image){
 		this.val = val;

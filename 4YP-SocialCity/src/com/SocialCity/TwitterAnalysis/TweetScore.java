@@ -4,6 +4,7 @@ import com.SocialCity.TwitterAnalysis.Twokenizer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class TweetScore {
 	
@@ -12,6 +13,12 @@ public class TweetScore {
 	private Double active = null;
 	private Double image = null;
 	private Double matched_ratio = null;
+	
+	private T_Classification classification = null;
+	
+	private String location = null;
+	
+	private Set nouns = null;
 
 	public TweetScore(String tweet, Double val, Double active, Double image, Double matched_ratio){
 		this.tweet = tweet;
@@ -19,6 +26,7 @@ public class TweetScore {
 		this.active = active;
 		this.image = image;
 		this.matched_ratio = matched_ratio;
+		
 	}
 	
 

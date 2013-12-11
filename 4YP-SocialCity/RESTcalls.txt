@@ -1,0 +1,32 @@
+	
+http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(true)OrBoroughs(false)/booleanForCombining(true for combine)/booleanForAllFactors(true returns every factor, false just the factor requested)
+
+**Restcall used to retrieve social factors for the wards or boroughs, which can be combined based on one factor. Final flag allows entire object, or just factor requested, to be returned**
+
+-http://localhost:8080/twoFactors/factorNumber1/factorNumber2/booleanForUsingWards(true)OrBoroughs(false)/booleanForCombining(true for combine)/booleanForAllFactors(true returns every factor, false just the factors requested)
+
+**Restcall used to retrieve social factors for the wards or boroughs, which can be combined based on factorNumber1. factorNumber2 is the main factor you are interested in seeing how it is affected by factorNumber1. Final flag allows entire object, or just factors requested, to be returned**
+
+-http://localhost:8080/hashTagFactors/tag1/tag2
+
+**Returns social factor objects for two different hash tags. Pass hashtags as strings.**
+
+-http://localhost:8080/hashTagList
+
+**Returns the availble hash tags that can be used in the above call**
+
+-http://localhost:8080/devicesForBorough/boroughCode
+
+**Will return a breakdown show, as a decimal, what devices are used by which boroughs for tweets**
+
+-http://localhost:8080/deviceList
+
+**returns all possible devices and services used to send a tweet within london**
+
+-http://localhost:8080/deviceFactor/device1
+
+**Will return a socialfactor object for the device requested**
+
+-http://localhost:8080/factorList
+
+**returns all factors availble and the factorNumber to be used**

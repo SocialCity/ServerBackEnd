@@ -24,7 +24,10 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 //Simple URL parse simulating a REST service. Following URL patterns accepted:
-	//-http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(T)OrBoroughs(F)
+	//-http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(true)OrBoroughs(false)/booleanForCombining(true for combine)/booleanForAllFactors(true returns every
+	//		factor, false just the factor requested)
+	//-http://localhost:8080/twoFactors/factorNumber1/factorNumber2/booleanForUsingWards(true)OrBoroughs(false)/booleanForCombining(true for combine)/booleanForAllFactors(true returns every
+	//		factor, false just the factors requested)
 	//-http://localhost:8080/hashTagFactors/tag1/tag2
 	//-http://localhost:8080/hashTagList
 	//-http://localhost:8080/devicesForBorough/boroughCode
@@ -42,13 +45,29 @@ public class RequestHandler extends AbstractHandler {
 		baseRequest.setHandled(true);
 		String reply;
 		String[] paths = request.getPathInfo().split("/");
+		boolean useWards;
+		boolean combine;
+		boolean all;
+		
 		try{
 			switch (paths[1]) {
 				case "oneFactor": 
 					int factor = Integer.parseInt(paths[2]);
-					boolean useWards = Boolean.parseBoolean(paths[3]);
-					if (factor < 0 || factor > 7) {throw new Exception();}
-					reply = rM.oneFactor(factor, useWards);
+					useWards = Boolean.parseBoolean(paths[3]);
+					combine = Boolean.parseBoolean(paths[4]);
+					all = Boolean.parseBoolean(paths[5]);
+					if (factor < 0 || factor > 8) {throw new Exception();}
+					reply = rM.oneFactor(factor, useWards, combine, all);
+					response.getWriter().println(reply);
+					break;
+				case "twoFactors":
+					int factor1 = Integer.parseInt(paths[2]);
+					int factor2 = Integer.parseInt(paths[3]);
+					useWards = Boolean.parseBoolean(paths[4]);
+					combine = Boolean.parseBoolean(paths[5]);
+					all = Boolean.parseBoolean(paths[6]);
+					if (factor1 < 0 || factor1 > 8 || factor2 < 0 || factor2 > 8) {throw new Exception();}
+					reply = rM.twoFactors(factor1, factor2, useWards, combine, all);
 					response.getWriter().println(reply);
 					break;
 				case "hashTagFactors":

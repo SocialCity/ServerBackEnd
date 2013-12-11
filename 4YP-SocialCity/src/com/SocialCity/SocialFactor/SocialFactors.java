@@ -98,6 +98,36 @@ public class SocialFactors {
 		this.sentiment = sentiment;
 	}
 	
+	public double getFactorValue(int factorNumber) {
+		switch (factorNumber) {
+		case 0: return this.crimeRate;
+		case 1: return this.housePrice;
+		case 2: return this.educationRating;
+		case 3: return this.transportRating;
+		case 4: return this.meanAge;
+		case 5: return this.drugRate;
+		case 6: return this.employmentRate;
+		case 7: return this.voteTurnout;
+		case 8: return this.tweetProportion;
+		default: return -1;
+		}
+	}
+	
+	public String getFactorName(int factorNumber) {
+		switch (factorNumber) {
+		case 0: return "crimeRate";
+		case 1: return "housePrice";
+		case 2: return "educationRating";
+		case 3: return "transportRating";
+		case 4: return "meanAge";
+		case 5: return "drugRate";
+		case 6: return "employmentRate";
+		case 7: return "voteTurnout";
+		case 8: return "tweetProportion";
+		default: return "";
+		}
+	}
+	
 	public void combineLocations(SocialFactors factors) {
 		if (crimeRate == -1) {
 			crimeRate = factors.getCrimeRate();

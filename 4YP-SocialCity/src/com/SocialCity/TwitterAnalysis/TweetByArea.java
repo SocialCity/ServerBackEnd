@@ -26,6 +26,7 @@ public class TweetByArea {
 		 codeNameMap = new CodeNameMap();
 	}
 	
+	//will return either all the tweets for a borough or devices used
 	public ArrayList<String> getTweetsForBorough(String boroughCode, boolean device) throws UnknownHostException {
 		BasicDBObject query;
 		String name = codeNameMap.getName(boroughCode);
@@ -56,6 +57,7 @@ public class TweetByArea {
 		return tweetText;
 	}
 	
+	//calculates how much each borough contributes to the total tweet count available
 	public HashMap<String, Double> tweetProportion() throws UnknownHostException {
 		HashMap<String, String> nameMap = codeNameMap.getNameMap();
 		ArrayList<String> list;
@@ -63,13 +65,13 @@ public class TweetByArea {
 		int total = 0;
 		
 		for (String key : nameMap.keySet()) {
-			if (key.length() == 4) {
+			if (key.length() == 4) {//retrieves the tweets for each borough
 				list = getTweetsForBorough(key, false);
-				total = total + list.size();
+				total = total + list.size();//count total tweets found in london
 				tweetCount.put(key, (double) list.size());
 			}
 		}
-		
+		//get the ration rather then actual number of tweets for a borough
 		for (String key : tweetCount.keySet()) {
 			tweetCount.put(key, (tweetCount.get(key)/total));
 		}
@@ -77,6 +79,7 @@ public class TweetByArea {
 		return tweetCount;
 	}
 
+	
 	public HashMap<String, Double> reTweets() throws UnknownHostException {
 		HashMap<String, String> nameMap = codeNameMap.getNameMap();
 		ArrayList<String> list;
@@ -98,6 +101,7 @@ public class TweetByArea {
 		return tweetCount;
 	}
 	
+	//create a social factors object for devices
 	public void deviceFactors() throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
@@ -132,20 +136,21 @@ public class TweetByArea {
 			BasicDBObject query = new BasicDBObject();
 			query.append("source", device);
 			placeRatio = new HashMap<String, Integer>();
-			results = tweets.find(query);
+			results = tweets.find(query);//find all tweets using current device
 			deviceFactors = new SocialFactors(newName.trim());
 			total=0;
 			
 			while (results.hasNext()){
 				places = (BasicDBObject)results.next().get("place");
 				placeName = "";
-				if (places != null) {
+				if (places != null) {//need to get name for place tweet occured, make sure its a borough
 					placeName = places.getString("name");
 				}
 				else {
 					continue;
 				}
 				count = 1;
+				//increase total for the current place for the device
 				if (placeRatio.containsKey(placeName)) {
 					count = placeRatio.get(placeName);
 			        count++;
@@ -254,7 +259,7 @@ public class TweetByArea {
 		coll.insert(insert);
 		System.out.println(insert);
 	}
-	
+	//retrieves all devices used in tweets
 	public HashSet<String> getDevices() throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );

@@ -10,6 +10,7 @@ import com.SocialCity.SocialFactor.SocialFactors;
 import com.SocialCity.TwitterAnalysis.HashTag;
 import com.SocialCity.TwitterAnalysis.TweetByArea;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -20,7 +21,32 @@ public class ResponseMaker {
 
 	private double factorConstant = 0.25;
 	
-	public String oneFactor(int factorNumber, boolean useWards) {
+	public String oneFactor(int factorNumber, boolean useWards, boolean combine, boolean all) {
+		ArrayList<SocialFactors> listOfData = createFactors(factorNumber, useWards, combine);
+		Gson gson = new Gson();
+		
+		if (all) {
+			return gson.toJson(listOfData);//convert list to JSON for return
+		}
+		else {
+			return gson.toJson(singleFactorOnly(listOfData, factorNumber));
+		}
+		
+	}
+	
+	public String twoFactors(int factorNumber1, int factorNumber2, boolean useWards, boolean combine, boolean all) {
+		ArrayList<SocialFactors> listOfData = createFactors(factorNumber1, useWards, combine);
+		Gson gson = new Gson();
+		
+		if (all) {
+			return gson.toJson(listOfData);
+		}
+		else {
+			return gson.toJson(twoFactorsOnly(listOfData, factorNumber1, factorNumber2));
+		}
+	}
+	
+	public ArrayList<SocialFactors> createFactors(int factorNumber, boolean useWards, boolean combine) {
 		
 		MongoClient mongoClient;
 		HashMap<String, ArrayList<String>> nameMap = BoundaryMap.returnWardMap(useWards);//gets either the ward or borough location data
@@ -35,7 +61,6 @@ public class ResponseMaker {
 		HashSet<String> toCheck = new HashSet<String>();
 		HashSet<String> tempChecked = new HashSet<String>();
 		boolean recheck = true;
-		Gson gson = new Gson();
 		
 		try {
 			//gets the database
@@ -68,11 +93,13 @@ public class ResponseMaker {
 								query = new BasicDBObject("locations", new BasicDBObject("ward0", n));
 								friend = new SocialFactors (coll.findOne(query));
 								//check if the two locations need to be combined
-								if (combine(sF, friend, factorNumber)){
-									recheck = true;
-									//System.out.println("here?");
-									//add new neighbours to list to check next iteration
-									toCheck.addAll(nameMap.get(friend.getLocation().get(0)));
+								if (combine) {
+									if (combine(sF, friend, factorNumber)){
+										recheck = true;
+										//System.out.println("here?");
+										//add new neighbours to list to check next iteration
+										toCheck.addAll(nameMap.get(friend.getLocation().get(0)));
+									}
 								}
 							}
 						}
@@ -97,9 +124,38 @@ public class ResponseMaker {
 			e.printStackTrace();
 		}
 		
-		return gson.toJson(listOfData);//convert list to JSON for return
+		return listOfData;
 	}
 	
+	private ArrayList<HashMap<String, Object>> singleFactorOnly (ArrayList<SocialFactors> listOfData, int factorNumber) {
+		ArrayList<HashMap<String, Object>> newList = new ArrayList<HashMap<String, Object>>();
+		HashMap<String, Object> currentEntry;
+		
+		for (SocialFactors sF : listOfData) {
+			currentEntry = new HashMap<String,Object>();
+			currentEntry.put("location", sF.getLocation());
+			currentEntry.put(sF.getFactorName(factorNumber), sF.getFactorValue(factorNumber));
+			newList.add(currentEntry);
+		}
+		
+		return newList;	
+	}
+	
+	private ArrayList<HashMap<String, Object>> twoFactorsOnly(ArrayList<SocialFactors> listOfData, int factorNumber1, int factorNumber2) {
+		ArrayList<HashMap<String, Object>> newList = new ArrayList<HashMap<String, Object>>();
+		HashMap<String, Object> currentEntry;
+		
+		for (SocialFactors sF : listOfData) {
+			currentEntry = new HashMap<String,Object>();
+			currentEntry.put("location", sF.getLocation());
+			currentEntry.put(sF.getFactorName(factorNumber1), sF.getFactorValue(factorNumber1));
+			currentEntry.put(sF.getFactorName(factorNumber2), sF.getFactorValue(factorNumber2));
+			newList.add(currentEntry);
+		}
+		
+		return newList;	
+	}
+
 	//Case statement to decide which factor to use. Use these numbers in URL requests
 	private boolean combine(SocialFactors sF, SocialFactors friend, int factorNumber) {
 		boolean combined = false;
@@ -292,4 +348,5 @@ public class ResponseMaker {
 		Gson gson = new Gson();
 		return gson.toJson(list);
 	}
+
 }

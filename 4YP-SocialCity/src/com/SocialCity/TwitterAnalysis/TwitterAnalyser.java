@@ -74,13 +74,83 @@ public class TwitterAnalyser {
 	}
 	
 	private WordScore analyse_token(String token){
+		//analyse individual word/token
 		
-		return null;
+		//is a matched word
+		if (map.containsKey(token)){
+			//word is in the map set, return the wordscore object held in the hashmap
+			return map.get(token);
+		}
+		//is a retweet indicator
+		//is a hastag
+		//is a noun
+		else
+			// no word in mapset, return invalid wordscore object
+			return new WordScore(token, -1.0, -1.0, -1.0);
 	}
 	
-	public TweetScore analyse_tweet(ArrayList<String> tokens){
+	public TweetScore analyse_tweet(String tweet){
+		//analyse a tweet
 		
-		return null;
+		//build twokenizer, squeeze whitespace and tokenize tweet
+		Twokenizer tw = new Twokenizer();
+		tweet = tw.squeezeWhitespace(tweet);
+		
+		//arraylist for holding the individual tokens
+//		ArrayList<String> tokens = (ArrayList<String>) tw.simpleTokenize(tweet);
+		
+		ArrayList<String> tokens = new ArrayList<String>(tw.simpleTokenize(tweet));
+		//arraylist for holding scores of individual tokens
+		ArrayList<WordScore> token_scores = new ArrayList<WordScore>();
+		
+		//analyse all tokens for the tweet
+		Iterator<String> it_tk = tokens.iterator();
+		while (it_tk.hasNext()){
+			token_scores.add(analyse_token(it_tk.next()));
+		}
+		
+		//generate tweet score
+		double avg_val = 0;
+		double avg_active = 0;
+		double avg_image = 0;
+		double matched_ratio = 0;
+		
+		double total_val = 0;
+		double total_active = 0;
+		double total_image = 0;
+		double total_matched_words = 0;
+		
+		WordScore score = null;
+		int total_count = 0;
+		int valid_count = 0;
+		
+		Iterator<WordScore> it_ws = token_scores.iterator();
+		while (it_ws.hasNext()){
+			total_count++;
+			score = it_ws.next();
+			//check if the wordscore object is invalid 
+			if (score.get_active() == -1){
+				continue;
+			}
+			//otherwise continue to total the scores
+			else{
+				valid_count++;
+				total_active = total_active + score.get_active();
+				total_val = total_val + score.get_valience();
+				total_image = total_image + score.get_image();
+				total_matched_words++;
+			}				
+		}
+		
+		//calculate averages
+		avg_active = total_active / valid_count;
+		avg_val = total_val / valid_count;
+		avg_image = total_image / valid_count;
+		matched_ratio = total_matched_words / total_count;
+
+		
+		//build new tweet score object and return it
+		return new TweetScore(tweet, avg_val, avg_active, avg_image, matched_ratio);
 	}
 	
 }

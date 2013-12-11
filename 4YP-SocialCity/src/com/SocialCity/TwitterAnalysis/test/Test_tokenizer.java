@@ -21,8 +21,6 @@ public class Test_tokenizer {
 				//find tweets
 		ArrayList<String> tweets= getTweets();
 		
-		
-		
 		ArrayList<String> squeezed_tweets= new ArrayList<String>();
 		ArrayList<List<String>> tokens= new ArrayList<List<String>>();
 						

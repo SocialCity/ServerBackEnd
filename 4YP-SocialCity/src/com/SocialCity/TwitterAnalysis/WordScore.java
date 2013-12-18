@@ -12,19 +12,24 @@ public class WordScore {
 	private Double image = null;
 	private String word = null;
 	
-	private String W_Classification = null;
+	private W_Classification classification = null;
 
-	public WordScore(String word, Double val, Double active, Double image){
+	public WordScore(String word, Double val, Double active, Double image, W_Classification classification){
 		this.val = val;
 		this.active = active;
 		this.image = image;
 		this.word = word;
+		this.classification = classification;
 	}
 	
 /*	public WordScore(Double val, Double active){
 		this.val = val;
 		this.active = active;
 	} */
+	
+	public W_Classification get_classification(){
+		return classification;
+	}
 	
 	public Double get_valience(){
 		return val;

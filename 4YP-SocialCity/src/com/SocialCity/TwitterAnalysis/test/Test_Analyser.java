@@ -16,6 +16,10 @@ import com.mongodb.MongoClient;
 
 public class Test_Analyser {
 
+	static final String mongoHost = "localhost";
+	static final String mongo_DB = "4YP";
+	static final String mongoCollection = "tweets";
+	
 	public static void main(String[] args) {
 		ArrayList<String> tweets = getTweets();
 		ArrayList<TweetScore> scores = new ArrayList<TweetScore>(); 
@@ -84,19 +88,19 @@ public class Test_Analyser {
 
 		try{
 			MongoClient mongoClient;
-			mongoClient = new MongoClient("localhost");
-			DB db = mongoClient.getDB( "tweetInfo" );
+			mongoClient = new MongoClient(mongoHost);
+			DB db = mongoClient.getDB(mongo_DB);
 			DBCollection coll = null;
-			coll = db.getCollection("tweets");		
+			coll = db.getCollection(mongoCollection);		
 			query = new BasicDBObject("place.name", name);
 			
 			System.out.println("fetching tweets");
 			
 			// use the query for a certain place
-			//DBCursor t = coll.find(query);
+			DBCursor t = coll.find(query);
 			
 			//get all tweets
-			DBCursor t =coll.find();
+			//DBCursor t =coll.find();
 			for (DBObject dbo : t) {;
 				tweets.add((String) dbo.get("text"));
 			}

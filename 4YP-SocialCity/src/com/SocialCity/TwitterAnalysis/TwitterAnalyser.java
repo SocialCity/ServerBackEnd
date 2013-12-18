@@ -20,11 +20,14 @@ public class TwitterAnalyser {
 	
 	private static Pattern Whitespace = Pattern.compile("\\s+");
 	private HashMap<String, WordScore> map = new HashMap<String, WordScore>();
+	private Twokenizer tw = null;
 
 	public TwitterAnalyser(String file_path){
 		//build the hash set used for analysis
 		ArrayList<WordScore> word_scores = readDAL(file_path);
 		buildHashSet(word_scores);
+		//build twokenizer, squeeze whitespace and tokenize tweet
+		tw = new Twokenizer();
 	}
 		//remove large amounts of whitespace down to a single space
 	public String squeezeWhitespace(String input) {
@@ -60,7 +63,8 @@ public class TwitterAnalyser {
 					scores.add(new WordScore(values[0], 
 							Double.parseDouble(values[1]), 
 							Double.parseDouble(values[2]), 
-							Double.parseDouble(values[3])));
+							Double.parseDouble(values[3]),
+							W_Classification.DAL_WORD ));
 				}
 				
 			}
@@ -86,20 +90,18 @@ public class TwitterAnalyser {
 		//is a noun
 		else
 			// no word in mapset, return invalid wordscore object
-			return new WordScore(token, -1.0, -1.0, -1.0);
+			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.UNMATCHED);
 	}
 	
 	public TweetScore analyse_tweet(String tweet){
 		//analyse a tweet
 		
-		//build twokenizer, squeeze whitespace and tokenize tweet
-		Twokenizer tw = new Twokenizer();
+		//squeeze whitespace and tokenize tweet
 		tweet = tw.squeezeWhitespace(tweet);
 		
 		//arraylist for holding the individual tokens
-//		ArrayList<String> tokens = (ArrayList<String>) tw.simpleTokenize(tweet);
-		
 		ArrayList<String> tokens = new ArrayList<String>(tw.simpleTokenize(tweet));
+		
 		//arraylist for holding scores of individual tokens
 		ArrayList<WordScore> token_scores = new ArrayList<WordScore>();
 		
@@ -129,7 +131,7 @@ public class TwitterAnalyser {
 			total_count++;
 			score = it_ws.next();
 			//check if the wordscore object is invalid 
-			if (score.get_active() == -1){
+			if (score.get_classification() == W_Classification.UNMATCHED){
 				continue;
 			}
 			//otherwise continue to total the scores

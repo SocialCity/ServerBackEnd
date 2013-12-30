@@ -1,48 +1,80 @@
 package com.SocialCity.TwitterAnalysis;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.HashMap;
+
 import com.SocialCity.TwitterAnalysis.WordScore;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TwitterAnalyser {
 	
 	private static Pattern Whitespace = Pattern.compile("\\s+");
-	private HashMap<String, WordScore> DAL_map = new HashMap<String, WordScore>();
+	//hash map containing the DAL scores
+	private HashMap<String, WordScore> DAL_hashmap = new HashMap<String, WordScore>();
+	// hash set containing the words in the wordnet core dictionary
+	private HashSet<String> Wordnet_hashset = new HashSet<String>();
 	private Twokenizer tw = null;
 
-	public TwitterAnalyser(String file_path){
+	public TwitterAnalyser(String DAL_file_path, String Wordnet_file_path){
 		//build the hash set used for analysis
-		ArrayList<WordScore> word_scores = readDAL(file_path);
-		buildHashSet(word_scores);
-		//build twokenizer, squeeze whitespace and tokenize tweet
+		ArrayList<WordScore> DAL_scores = readDAL(DAL_file_path);
+		ArrayList<String> wordnet_words = readWordNet(Wordnet_file_path);
+		buildHashMap(DAL_hashmap, DAL_scores);
+		buildHashSet(Wordnet_hashset, wordnet_words);
+		//build twokenizer
 		tw = new Twokenizer();
 	}
+		
 		//remove large amounts of whitespace down to a single space
 	public String squeezeWhitespace(String input) {
 		Matcher whitespaceMatcher = Whitespace.matcher(input);
 		return whitespaceMatcher.replaceAll(" ").trim();
 	}
 	
+	private void buildHashSet(HashSet<String> hashset, ArrayList<String> words) {
+		for (int i = 0; i < words.size(); i++){
+			hashset.add(words.get(i));		}
+	}
+	
 	//build the hash set used for word matching with the analyser
-	private void buildHashSet(ArrayList<WordScore> wordScores){
+	private void buildHashMap(HashMap<String, WordScore> hashmap, ArrayList<WordScore> wordScores){
 		WordScore ws;
 		for (int i = 0; i < wordScores.size(); i++){
 			ws = wordScores.get(i);
-			DAL_map.put(ws.get_word(), ws);
+			hashmap.put(ws.get_word(), ws);
 		}
 	}
+	
+	//read in wordnet list and return an arraylist of words
+	private ArrayList<String> readWordNet(String file){
+		BufferedReader br;
+		String line;
+		ArrayList<String> words = new ArrayList();
+
+		//read in file and create arraylist of scores
+		try{
+			br = new BufferedReader(new FileReader(file));
+			while ((line = br.readLine()) != null) {
+				if (!line.startsWith("#")){
+					
+					line = squeezeWhitespace(line);
+					words.add(line);
+				}
+			}
+			br.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return words;
+	}
+	
+	
 	
 	//read in the DAL file and return a set of word scores
 	private ArrayList<WordScore> readDAL(String file){
@@ -79,11 +111,15 @@ public class TwitterAnalyser {
 	
 	private WordScore analyse_token(String token){
 		//analyse individual word/token
-		
+		token = token.toLowerCase();
 		//is a matched word in the DAL set
-		if (DAL_map.containsKey(token)){
+		if (DAL_hashmap.containsKey(token)){
 			//word is in the map set, return the wordscore object held in the hashmap
-			return DAL_map.get(token);
+			return DAL_hashmap.get(token);
+		}
+		// is a matched word in the Wordnet Core
+		if (Wordnet_hashset.contains(token)){
+			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.WORDNET);
 		}
 		//is a retweet indicator
 		//is a hastag
@@ -95,7 +131,7 @@ public class TwitterAnalyser {
 	
 	public TweetScore analyse_tweet(String tweet){
 		//analyse a tweet
-		
+
 		//squeeze whitespace and tokenize tweet
 		tweet = tw.squeezeWhitespace(tweet);
 		
@@ -105,54 +141,100 @@ public class TwitterAnalyser {
 		//arraylist for holding scores of individual tokens
 		ArrayList<WordScore> token_scores = new ArrayList<WordScore>();
 		
+		//arraylist for holding matched words from the tweet
+		ArrayList<String> matched_words = new ArrayList<String>();
+		
+		
+		//*************************************************************************************//
+		//*************** Put all tokens through the analyse_token method                   ***//
+		//*************** Returning token_scores for all tokens (even if invalid/unmatched) ***//
+		
 		//analyse all tokens for the tweet
 		Iterator<String> it_tk = tokens.iterator();
 		while (it_tk.hasNext()){
 			token_scores.add(analyse_token(it_tk.next()));
 		}
 		
-		//generate tweet score
-		double avg_val = 0;
-		double avg_active = 0;
-		double avg_image = 0;
-		double matched_ratio = 0;
+		//********************************************************************//
 		
-		double total_val = 0;
-		double total_active = 0;
-		double total_image = 0;
-		double total_matched_words = 0;
+		//generate tweet score
+		double avg_val = 0.0;
+		double avg_active = 0.0;
+		double avg_image = 0.0;
+		double matched_ratio = 0.0;
+		
+		double total_val = 0.0;
+		double total_active = 0.0;
+		double total_image = 0.0;
+		double total_matched_words = 0.0;
 		
 		WordScore score = null;
 		int total_count = 0;
-		int valid_count = 0;
+		int DAL_count = 0;
+		
+		//*************************************************************************************************//
+		// iteratre through tokens to generate activity, valience, imagery and matched words for the tweet //
 		
 		Iterator<WordScore> it_ws = token_scores.iterator();
 		while (it_ws.hasNext()){
 			total_count++;
 			score = it_ws.next();
-			//check if the wordscore object is invalid 
-			if (score.get_classification() == W_Classification.UNMATCHED){
-				continue;
-			}
-			//otherwise continue to total the scores
-			else{
-				valid_count++;
+			// check if DAL word
+			if (score.get_classification() == W_Classification.DAL_WORD){
+				DAL_count++;
+				total_matched_words++;
 				total_active = total_active + score.get_active();
 				total_val = total_val + score.get_valience();
 				total_image = total_image + score.get_image();
+				matched_words.add(score.get_word());
+			}
+			// check if WordNet word
+			else if (score.get_classification() == W_Classification.WORDNET)
+			{
+				matched_words.add(score.get_word());
 				total_matched_words++;
 			}				
 		}
 		
-		//calculate averages
-		avg_active = total_active / valid_count;
-		avg_val = total_val / valid_count;
-		avg_image = total_image / valid_count;
-		matched_ratio = total_matched_words / total_count;
-
 		
+		//*** calculate averages for this tweet ***/
+		DAL_Classification dal_classification;
+
+		//check numbers are valid
+		if (DAL_count != 0 && total_active != 0.0)
+		{
+			//calculate averages
+			avg_active = total_active / DAL_count;
+			avg_val = total_val / DAL_count;
+			avg_image = total_image / DAL_count;
+			dal_classification = DAL_Classification.VALID;
+
+		}
+		else // no DAL matches, invalid values for active, valience and imagery
+		{
+			avg_active = -1.0;
+			avg_val = -1.0;
+			avg_image = -1.0;
+			dal_classification = DAL_Classification.INVALID;
+
+		}
+		//check numbers are valid
+		if (total_matched_words != 0)
+		{
+			matched_ratio = total_matched_words / total_count;
+		}
+		else // no matched words in this tweet
+		{
+			matched_ratio = 0.0;
+		}
+			
+		
+		
+				
 		//build new tweet score object and return it
-		return new TweetScore(tweet, avg_val, avg_active, avg_image, matched_ratio);
+		TweetScore ts =  new TweetScore(tweet, avg_val, avg_active, avg_image, matched_ratio, dal_classification);
+		ts.add_matched_words(matched_words);
+		return ts;
 	}
 	
 }

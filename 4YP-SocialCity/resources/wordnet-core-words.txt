@@ -1,3 +1,4 @@
+#this file contains the 5000 words from the wordnet-core dictionary
 able
 abnormal
 absent
@@ -4396,14 +4397,3 @@ harm
 hate
 haul
 haunt
-have
-heal
-hear
-help
-hesitate
-hiccup
-hide
-hide
-hike
-hit
-hit

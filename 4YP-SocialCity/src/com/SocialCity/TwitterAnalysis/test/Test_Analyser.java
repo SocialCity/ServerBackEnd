@@ -1,9 +1,11 @@
 package com.SocialCity.TwitterAnalysis.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import com.SocialCity.TwitterAnalysis.DAL_Classification;
 import com.SocialCity.TwitterAnalysis.TweetScore;
 import com.SocialCity.TwitterAnalysis.TwitterAnalyser;
 import com.SocialCity.TwitterAnalysis.Twokenizer;
@@ -24,7 +26,10 @@ public class Test_Analyser {
 		ArrayList<String> tweets = getTweets();
 		ArrayList<TweetScore> scores = new ArrayList<TweetScore>(); 
 		
-		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt");
+		//hashmap storing words that were matched and how many times they were matched
+		HashMap<String, Integer> matched_words = new HashMap<String, Integer>();
+		
+		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt");
 			
 		
 		
@@ -35,25 +40,47 @@ public class Test_Analyser {
 			scores.add(ta.analyse_tweet(i.next()));
 		}
 		
-		
+		//analytics setup
 		double total_matched_ratio = 0;
 		double total_valience = 0;
 		double total_activity = 0;
 		double total_imagery = 0;
 		double count = 0;
-		
 		TweetScore tweet_sc = null;
 		Iterator<TweetScore> it_ts = scores.iterator();
+		
+		// look at each tweet score
 		while (it_ts.hasNext()){
 			tweet_sc = it_ts.next();
 			
-			//analytics setup
-			total_matched_ratio =+ tweet_sc.get_matched_ratio();
-			total_valience =+ tweet_sc.get_valience();
-			total_activity =+ tweet_sc.get_active();
-			total_imagery =+ tweet_sc.get_image();
-			count++;
+			// total the matched ratios from all tweets
+			total_matched_ratio = total_matched_ratio + tweet_sc.get_matched_ratio();
 			
+			// total the val, act, img values for valid tweets (matched words with the DAL set)
+			if (tweet_sc.get_Dal_classification() == DAL_Classification.VALID){
+				total_valience = total_valience + tweet_sc.get_valience();
+				total_activity = total_activity + tweet_sc.get_active();
+				total_imagery = total_imagery + tweet_sc.get_image();
+				count++;
+			}
+			
+		
+				
+			//get an iterator for the words that were matched from the tweet
+			Iterator words_it = tweet_sc.get_words().iterator();
+			
+			//build hashmap of words that were popular
+			while (words_it.hasNext()){
+				String word = (String) words_it.next();
+				if (matched_words.containsKey(word)){
+					int score = matched_words.get(word);
+					score++;
+					matched_words.put(word, score);
+				}
+				else{
+					matched_words.put((String) word, 1);
+				}
+			}
 			
 			
 		/*	System.out.println("****************");
@@ -67,18 +94,30 @@ public class Test_Analyser {
 		
 		//analytics over the sentiment analyser
 		
-		double avg_matched_ratio = total_matched_ratio / count;
-		double avg_valience = total_valience /count;
-		double avg_activity = total_activity /count;
-		double avg_imagery = total_imagery /count;
+		double avg_matched_ratio = total_matched_ratio / tweets.size();
+		double avg_valience = total_valience / count;
+		double avg_activity = total_activity / count;
+		double avg_imagery = total_imagery / count;
+		
+		
+		
 		
 		//print out analytic
+		
+		//print out matched words
+				Iterator words_it = matched_words.keySet().iterator();
+				while (words_it.hasNext()){
+					String word = (String) words_it.next();
+					System.out.println(word + " " + matched_words.get(word));
+				}
 		
 		System.out.println("************ averages ***********");
 		System.out.println("average valience: " + avg_valience);
 		System.out.println("average activity: " + avg_activity);
 		System.out.println("average imagery: " + avg_imagery);
 		System.out.println("average matched ratio: " + avg_matched_ratio);
+		System.out.println("Total Number of Tweets: " + tweets.size());
+		System.out.println("DAL valid tweets: " + count);
 	}
 
 	public static ArrayList getTweets(){

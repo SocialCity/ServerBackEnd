@@ -48,8 +48,7 @@ public class TweetScore {
 	}
 	
 	public Double get_matched_ratio(){
-		return matched_ratio
-				;
+		return matched_ratio;
 	}
 
 	

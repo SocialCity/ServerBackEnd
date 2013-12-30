@@ -13,6 +13,10 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Test_tokenizer {
+	
+	static final String mongoHost = "localhost";
+	static final String mongo_DB = "4YP";
+	static final String mongoCollection = "tweets";
 
 	public static void main(String[] args) {
 	
@@ -54,13 +58,12 @@ public class Test_tokenizer {
 
 		try{
 			MongoClient mongoClient;
-			mongoClient = new MongoClient("localhost");
-			DB db = mongoClient.getDB( "tweetInfo" );
+			mongoClient = new MongoClient(mongoHost);
+			DB db = mongoClient.getDB(mongo_DB);
 			DBCollection coll = null;
-			coll = db.getCollection("tweets");		
+			coll = db.getCollection(mongoCollection);		
 			query = new BasicDBObject("place.name", name);
-			
-			System.out.println("here");
+			System.out.println("fetching tweets");
 			
 			DBCursor t = coll.find(query);
 			for (DBObject dbo : t) {
@@ -71,7 +74,7 @@ public class Test_tokenizer {
 			e.printStackTrace();
 		}
 		
-		System.out.println("returning");
+		System.out.println("returning tweets");
 		return tweets;
 		
 		

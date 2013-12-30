@@ -58,7 +58,7 @@ public class Twokenizer {
 	private static Pattern Contractions = Pattern.compile("(?i)^(\\w+)(n't|'ve|'ll|'d|'re|'s|'m)$");
 	private static Pattern Whitespace = Pattern.compile("\\s+");
 	
-	private static String punctChars = "['“\\\".?!,:;]";
+	private static String punctChars = "['â€œ\\\".?!,:;]";
 	private static String punctSeq = punctChars + "+";
 	private static String entity = "&(amp|lt|gt|quot);";
 	
@@ -77,21 +77,21 @@ public class Twokenizer {
 	private static String numberWithCommas = "(\\d+,)+?\\d{3}" + "(?=([^,]|$))";
 
 	// 'Smart Quotes' (http://en.wikipedia.org/wiki/Smart_quotes)
-	private static String edgePunctChars    = "'\\\"“”‘’<>«»{}\\(\\)\\[\\]";
+	private static String edgePunctChars    = "'\\\"â€œâ€�â€˜â€™<>Â«Â»{}\\(\\)\\[\\]";
 	private static String edgePunct    = "[" + edgePunctChars + "]";
 	private static String notEdgePunct = "[a-zA-Z0-9]";
 	private static Pattern EdgePunctLeft  = Pattern.compile("(\\s|^)(" + edgePunct + "+)(" + notEdgePunct + ")");
 	private static Pattern EdgePunctRight = Pattern.compile("(" + notEdgePunct + ")(" + edgePunct + "+)(\\s|$)");    
 
 	// Abbreviations
-	private static String boundaryNotDot = "($|\\s|[“\\\"?!,:;]|" + entity + ")"; 
+	private static String boundaryNotDot = "($|\\s|[â€œ\\\"?!,:;]|" + entity + ")"; 
 	private static String aa1  = "([A-Za-z]\\.){2,}(?=" + boundaryNotDot + ")";
 	private static String aa2  = "[^A-Za-z]([A-Za-z]\\.){1,}[A-Za-z](?=" + boundaryNotDot + ")";
 	private static String standardAbbreviations = "\\b([Mm]r|[Mm]rs|[Mm]s|[Dd]r|[Ss]r|[Jj]r|[Rr]ep|[Ss]en|[Ss]t)\\.";
 	private static String arbitraryAbbrev = "(" + aa1 + "|" + aa2 + "|" + standardAbbreviations + ")";
 
-	private static String separators  = "(--+|―)";
-	private static String decorations = "[♫]+";
+	private static String separators  = "(--+|â€•)";
+	private static String decorations = "[â™«]+";
 	private static String thingsThatSplitWords = "[^\\s\\.,]";
 	private static String embeddedApostrophe = thingsThatSplitWords + "+'" + thingsThatSplitWords + "+";
 
@@ -157,7 +157,6 @@ public class Twokenizer {
    
    // simpleTokenize should be called after using squeezeWhitespace()
    public List<String> simpleTokenize(String text) {
-	   
 	   // Do the no-brainers first
 	   String splitPunctText = splitEdgePunct(text);
 	   int textLength = splitPunctText.length();
@@ -230,15 +229,28 @@ public class Twokenizer {
 	   // split based on special patterns (like contractions) and remove all tokens are empty
 	   Vector<String> finalTokens = new Vector<String>();
 	   for (String str: zippedStr) {
-		   Vector<String> tokens = splitToken(str);
+		
+		 //************* 
+		 // Code edit: 19/12/2013
+		 // The following line of code is removed to stop the tokenizer from splitting around contractions.
+		 // e.g. preventing {"can't"} be tokenized to {"ca", "n't"}
+		 // 
+		 // Vector<String> tokens = splitToken(str);
+		 /*
+		   
+		   // if we have split by contractions, the following code is needed to prevent empty tokes added to final tokens
 		   // only add non-empty tokens
 		   for (String token: tokens) {
 			   if (!token.isEmpty()) {
 				   finalTokens.add(token);
 			   }
 		   }
+		  */
+		// only add non-empty tokens and tokens which arn't just commas ","
+		   if (!str.isEmpty() && str.toCharArray()[0] != ',') {
+			   finalTokens.add(str);
+		   }
 	   }
-
 	   return finalTokens;
    }
    

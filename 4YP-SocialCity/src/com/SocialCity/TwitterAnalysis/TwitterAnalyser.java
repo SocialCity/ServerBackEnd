@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class TwitterAnalyser {
 	
 	private static Pattern Whitespace = Pattern.compile("\\s+");
-	private HashMap<String, WordScore> map = new HashMap<String, WordScore>();
+	private HashMap<String, WordScore> DAL_map = new HashMap<String, WordScore>();
 	private Twokenizer tw = null;
 
 	public TwitterAnalyser(String file_path){
@@ -40,7 +40,7 @@ public class TwitterAnalyser {
 		WordScore ws;
 		for (int i = 0; i < wordScores.size(); i++){
 			ws = wordScores.get(i);
-			map.put(ws.get_word(), ws);
+			DAL_map.put(ws.get_word(), ws);
 		}
 	}
 	
@@ -80,10 +80,10 @@ public class TwitterAnalyser {
 	private WordScore analyse_token(String token){
 		//analyse individual word/token
 		
-		//is a matched word
-		if (map.containsKey(token)){
+		//is a matched word in the DAL set
+		if (DAL_map.containsKey(token)){
 			//word is in the map set, return the wordscore object held in the hashmap
-			return map.get(token);
+			return DAL_map.get(token);
 		}
 		//is a retweet indicator
 		//is a hastag

@@ -13,7 +13,9 @@ public class TweetScore {
 	private Double active = null;
 	private Double image = null;
 	private Double matched_ratio = null;
-	private ArrayList<String> matched_words = new ArrayList(); 
+	private ArrayList<String> matched_words = new ArrayList();
+	private ArrayList<String> hashtags = new ArrayList(); 
+
 	
 	private T_Classification t_classification = null;
 	
@@ -31,6 +33,18 @@ public class TweetScore {
 		this.matched_ratio = matched_ratio;
 		this.dal_classification = dal_classification;
 		
+	}
+	
+	public void add_hashtag(String hashtag){
+		hashtags.add(hashtag);
+	}
+	
+	public void add_hashtags(ArrayList<String> hashtags){
+		this.hashtags.addAll(hashtags);
+	}
+	
+	public ArrayList get_hashtags(){
+		return hashtags;
 	}
 	
 	public void add_matched_word(String word){

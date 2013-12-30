@@ -55,7 +55,7 @@ public class TwitterAnalyser {
 	private ArrayList<String> readWordNet(String file){
 		BufferedReader br;
 		String line;
-		ArrayList<String> words = new ArrayList();
+		ArrayList<String> words = new ArrayList<String>();
 
 		//read in file and create arraylist of scores
 		try{
@@ -112,6 +112,7 @@ public class TwitterAnalyser {
 	private WordScore analyse_token(String token){
 		//analyse individual word/token
 		token = token.toLowerCase();
+
 		//is a matched word in the DAL set
 		if (DAL_hashmap.containsKey(token)){
 			//word is in the map set, return the wordscore object held in the hashmap
@@ -121,9 +122,12 @@ public class TwitterAnalyser {
 		if (Wordnet_hashset.contains(token)){
 			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.WORDNET);
 		}
-		//is a retweet indicator
 		//is a hastag
-		//is a noun
+		if (token.startsWith("#")){
+			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.HASHTAG);
+		}
+		//retweet
+		
 		else
 			// no word in mapset, return invalid wordscore object
 			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.UNMATCHED);
@@ -176,6 +180,8 @@ public class TwitterAnalyser {
 		// iteratre through tokens to generate activity, valience, imagery and matched words for the tweet //
 		
 		Iterator<WordScore> it_ws = token_scores.iterator();
+		ArrayList<String> hashtags = new ArrayList<String>();
+		
 		while (it_ws.hasNext()){
 			total_count++;
 			score = it_ws.next();
@@ -193,7 +199,11 @@ public class TwitterAnalyser {
 			{
 				matched_words.add(score.get_word());
 				total_matched_words++;
-			}				
+			}
+			else if (score.get_classification() == W_Classification.HASHTAG){
+				hashtags.add(score.get_word());
+				total_matched_words++;
+			}
 		}
 		
 		
@@ -234,6 +244,7 @@ public class TwitterAnalyser {
 		//build new tweet score object and return it
 		TweetScore ts =  new TweetScore(tweet, avg_val, avg_active, avg_image, matched_ratio, dal_classification);
 		ts.add_matched_words(matched_words);
+		ts.add_hashtags(hashtags);
 		return ts;
 	}
 	

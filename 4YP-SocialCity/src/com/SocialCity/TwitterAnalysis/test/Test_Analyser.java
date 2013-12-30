@@ -28,6 +28,8 @@ public class Test_Analyser {
 		
 		//hashmap storing words that were matched and how many times they were matched
 		HashMap<String, Integer> matched_words = new HashMap<String, Integer>();
+		HashMap<String, Integer> hashtag_map = new HashMap<String, Integer>();
+
 		
 		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt");
 			
@@ -72,7 +74,8 @@ public class Test_Analyser {
 			//build hashmap of words that were popular
 			while (words_it.hasNext()){
 				String word = (String) words_it.next();
-				if (matched_words.containsKey(word)){
+				if (matched_words.containsKey(word))
+				{
 					int score = matched_words.get(word);
 					score++;
 					matched_words.put(word, score);
@@ -80,6 +83,23 @@ public class Test_Analyser {
 				else{
 					matched_words.put((String) word, 1);
 				}
+			}
+				
+				//get an iterator for the hashtags that were matched from the tweet
+				Iterator hashtags_it = tweet_sc.get_hashtags().iterator();
+				
+				//build hashmap of hashtags that were popular
+				while (hashtags_it.hasNext()){
+					String tag = (String) hashtags_it.next();
+					if (hashtag_map.containsKey(tag))
+					{
+						int score = hashtag_map.get(tag);
+						score++;
+						hashtag_map.put(tag, score);
+					}
+					else{
+						hashtag_map.put((String) tag, 1);
+					}
 			}
 			
 			
@@ -105,10 +125,17 @@ public class Test_Analyser {
 		//print out analytic
 		
 		//print out matched words
-				Iterator words_it = matched_words.keySet().iterator();
-				while (words_it.hasNext()){
-					String word = (String) words_it.next();
-					System.out.println(word + " " + matched_words.get(word));
+				Iterator matched_words_it = matched_words.keySet().iterator();
+				while (matched_words_it.hasNext()){
+					String word = (String) matched_words_it.next();
+	//			System.out.println(word + " " + matched_words.get(word));
+				}
+				
+		//print out hashtags
+				Iterator tags_it = hashtag_map.keySet().iterator();
+				while (tags_it.hasNext()){
+					String hashtag = (String) tags_it.next();
+	//			System.out.println(hashtag + " " + hashtag_map.get(hashtag));
 				}
 		
 		System.out.println("************ averages ***********");

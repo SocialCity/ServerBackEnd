@@ -1,6 +1,6 @@
 package com.SocialCity.TwitterAnalysis;
 
 public enum W_Classification {
-	DAL_WORD, HASHTAG, NOUN, UNMATCHED, ATSymbol, WORDNET;
+	DAL_WORD, HASHTAG, NOUN, UNMATCHED, ATSymbol, WORDNET, RETWEET;
 	
 }

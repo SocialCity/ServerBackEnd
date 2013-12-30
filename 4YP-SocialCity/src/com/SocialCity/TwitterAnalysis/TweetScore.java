@@ -14,25 +14,46 @@ public class TweetScore {
 	private Double image = null;
 	private Double matched_ratio = null;
 	private ArrayList<String> matched_words = new ArrayList();
-	private ArrayList<String> hashtags = new ArrayList(); 
+	private ArrayList<String> hashtags = new ArrayList();
+	private ArrayList<String> AT_tags = new ArrayList();
 
 	
 	private T_Classification t_classification = null;
 	
 	private DAL_Classification dal_classification = null;
 	
+	private boolean retweet_flag;
+	
 	private String location = null;
 	
 	private Set nouns = null;
 
-	public TweetScore(String tweet, Double val, Double active, Double image, Double matched_ratio, DAL_Classification dal_classification){
+	public TweetScore(String tweet, Double val, Double active, Double image, Double matched_ratio, DAL_Classification dal_classification, Boolean retweet){
 		this.tweet = tweet;
 		this.val = val;
 		this.active = active;
 		this.image = image;
 		this.matched_ratio = matched_ratio;
 		this.dal_classification = dal_classification;
+		retweet_flag = retweet;
 		
+	}
+	
+	public void add_at_tag(String at_tag){
+		AT_tags.add(at_tag);
+	}
+	
+	public void add_at_tags(ArrayList<String> at_tags){
+		this.AT_tags.addAll(at_tags);
+	}
+	
+	public ArrayList<String> get_at_tags(){
+		return AT_tags;
+	}
+	
+	
+	public boolean get_retweet_flag(){
+		return retweet_flag;
 	}
 	
 	public void add_hashtag(String hashtag){

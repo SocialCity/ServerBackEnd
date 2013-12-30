@@ -29,6 +29,7 @@ public class Test_Analyser {
 		//hashmap storing words that were matched and how many times they were matched
 		HashMap<String, Integer> matched_words = new HashMap<String, Integer>();
 		HashMap<String, Integer> hashtag_map = new HashMap<String, Integer>();
+		HashMap<String, Integer> at_tag_map = new HashMap<String, Integer>();
 
 		
 		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt");
@@ -48,12 +49,17 @@ public class Test_Analyser {
 		double total_activity = 0;
 		double total_imagery = 0;
 		double count = 0;
+		double retweet_count = 0;
 		TweetScore tweet_sc = null;
 		Iterator<TweetScore> it_ts = scores.iterator();
 		
 		// look at each tweet score
 		while (it_ts.hasNext()){
 			tweet_sc = it_ts.next();
+			
+			//total the number of retweets
+			if (tweet_sc.get_retweet_flag() == true)
+					retweet_count = retweet_count + 1;
 			
 			// total the matched ratios from all tweets
 			total_matched_ratio = total_matched_ratio + tweet_sc.get_matched_ratio();
@@ -85,8 +91,8 @@ public class Test_Analyser {
 				}
 			}
 				
-				//get an iterator for the hashtags that were matched from the tweet
-				Iterator hashtags_it = tweet_sc.get_hashtags().iterator();
+			 //get an iterator for the hashtags that were matched from the tweet
+			Iterator hashtags_it = tweet_sc.get_hashtags().iterator();
 				
 				//build hashmap of hashtags that were popular
 				while (hashtags_it.hasNext()){
@@ -101,16 +107,25 @@ public class Test_Analyser {
 						hashtag_map.put((String) tag, 1);
 					}
 			}
-			
-			
-		/*	System.out.println("****************");
-			System.out.println(tweet_sc.get_tweet());
-			System.out.println("valience: " + tweet_sc.get_valience());
-			System.out.println("activity: " + tweet_sc.get_active());
-			System.out.println("imagery: " + tweet_sc.get_image());
-			System.out.println("matched ratio: " + tweet_sc.get_matched_ratio());
-			System.out.println("****************"); */
+				
+			//get an iterator for the at_tags that were matched from the tweet
+			Iterator at_tags_it = tweet_sc.get_at_tags().iterator();
+					
+					//build hashmap of hashtags that were popular
+					while (at_tags_it.hasNext()){
+						String tag = (String) at_tags_it.next();
+						if (at_tag_map.containsKey(tag))
+						{
+							int score = at_tag_map.get(tag);
+							score++;
+							at_tag_map.put(tag, score);
+						}
+						else{
+							at_tag_map.put((String) tag, 1);
+						}
+				}
 		}
+		
 		
 		//analytics over the sentiment analyser
 		
@@ -132,10 +147,29 @@ public class Test_Analyser {
 				}
 				
 		//print out hashtags
+				
+				double hashtag_count = 0;
+				double hashtag_total_count = 0;
+				
 				Iterator tags_it = hashtag_map.keySet().iterator();
 				while (tags_it.hasNext()){
 					String hashtag = (String) tags_it.next();
+					hashtag_count++;
+					hashtag_total_count = hashtag_total_count + hashtag_map.get(hashtag);
 	//			System.out.println(hashtag + " " + hashtag_map.get(hashtag));
+				}
+				
+				//print out at_tags
+				
+				double at_tag_count = 0;
+				double at_tag_total_count = 0;
+				
+				Iterator at_tags_it = at_tag_map.keySet().iterator();
+				while (at_tags_it.hasNext()){
+					String at_tag = (String) at_tags_it.next();
+					at_tag_count++;
+					at_tag_total_count = at_tag_total_count + at_tag_map.get(at_tag);
+	//			System.out.println(at_tag + " " + at_tag_map.get(at_tag));
 				}
 		
 		System.out.println("************ averages ***********");
@@ -145,6 +179,11 @@ public class Test_Analyser {
 		System.out.println("average matched ratio: " + avg_matched_ratio);
 		System.out.println("Total Number of Tweets: " + tweets.size());
 		System.out.println("DAL valid tweets: " + count);
+		System.out.println("Number of retweets: " + retweet_count);
+		System.out.println("Number of unique hashtags: " + hashtag_count);
+		System.out.println("Number of hashtags: " + hashtag_total_count);
+		System.out.println("Number of unique at_tags: " + at_tag_count);
+		System.out.println("Number of at_tags: " + at_tag_total_count);
 	}
 
 	public static ArrayList getTweets(){

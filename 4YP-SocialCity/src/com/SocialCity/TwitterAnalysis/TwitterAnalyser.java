@@ -127,9 +127,17 @@ public class TwitterAnalyser {
 			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.HASHTAG);
 		}
 		//retweet
+		if (token.equals("rt") || token.equals("retweet"))
+		{
+			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.RETWEET);
+		}
+		//directed @ tweet
+		if (token.startsWith("@"))
+		{
+			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.ATSymbol);
+		}
 		
-		else
-			// no word in mapset, return invalid wordscore object
+		else 			// no word in mapset, return invalid wordscore object
 			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.UNMATCHED);
 	}
 	
@@ -181,7 +189,9 @@ public class TwitterAnalyser {
 		
 		Iterator<WordScore> it_ws = token_scores.iterator();
 		ArrayList<String> hashtags = new ArrayList<String>();
-		
+		ArrayList<String> AT_tags = new ArrayList<String>();
+		boolean retweet = false;
+
 		while (it_ws.hasNext()){
 			total_count++;
 			score = it_ws.next();
@@ -203,6 +213,15 @@ public class TwitterAnalyser {
 			else if (score.get_classification() == W_Classification.HASHTAG){
 				hashtags.add(score.get_word());
 				total_matched_words++;
+			}
+			else if (score.get_classification() == W_Classification.RETWEET){
+				retweet = true;
+				total_matched_words++;
+			}
+			else if (score.get_classification() == W_Classification.ATSymbol){
+				AT_tags.add(score.get_word());
+				total_matched_words++;
+				
 			}
 		}
 		
@@ -242,9 +261,10 @@ public class TwitterAnalyser {
 		
 				
 		//build new tweet score object and return it
-		TweetScore ts =  new TweetScore(tweet, avg_val, avg_active, avg_image, matched_ratio, dal_classification);
+		TweetScore ts =  new TweetScore(tweet, avg_val, avg_active, avg_image, matched_ratio, dal_classification, retweet);
 		ts.add_matched_words(matched_words);
 		ts.add_hashtags(hashtags);
+		ts.add_at_tags(AT_tags);
 		return ts;
 	}
 	

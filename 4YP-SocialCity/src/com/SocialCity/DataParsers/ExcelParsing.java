@@ -27,7 +27,7 @@ public class ExcelParsing {
 		DBCollection coll = null;
 		DBCollection collBorough = null;
 		String name;
-		HashMap<String, Double> tweetCount = (new TweetByArea()).tweetProportion();
+		HashMap<String, Double> tweetCount = (new TweetByArea()).tweetProportion(null);
 		
 		try {//set up file reader and databases
 			Workbook workbook = Workbook.getWorkbook(new File("resources/ward-profiles-excel-version.xls"));
@@ -69,7 +69,6 @@ public class ExcelParsing {
 			sF.setDrugRate(Double.parseDouble(sheet.getCell(60, i).getContents()));
 			sF.setEmploymentRate(Double.parseDouble(sheet.getCell(22, i).getContents()));
 			sF.setVoteTurnout(Double.parseDouble(sheet.getCell(65, i).getContents()));
-			sF.setTweetProportion(tweetCount.get(code.substring(0, 4)));
 			
 			if (sF.getLocation().get(0).length() == 6) {//checks if location is a ward
 				coll.insert(sF.getDBObject());

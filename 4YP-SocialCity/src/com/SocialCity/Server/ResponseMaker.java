@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.SocialCity.Area.BoundaryMap;
+import com.SocialCity.DataParsers.CollectionReader;
 import com.SocialCity.SocialFactor.SocialFactors;
 import com.SocialCity.TwitterAnalysis.HashTag;
 import com.SocialCity.TwitterAnalysis.TweetByArea;
@@ -69,10 +70,10 @@ public class ResponseMaker {
 			DB db = mongoClient.getDB( "areas" );
 			
 			if (useWards){//get ward info
-				coll = db.getCollection("wards");
+				coll = db.getCollection(CollectionReader.returnName("wardsCollection"));
 			}
 			else {//get borough info
-				coll = db.getCollection("boroughs");
+				coll = db.getCollection(CollectionReader.returnName("boroughsCollection"));
 				System.out.println(coll.getCount());
 			}
 			
@@ -234,7 +235,7 @@ public class ResponseMaker {
 	public String hashTags(String tag1, String tag2) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
-		DBCollection hashTagInfo = db.getCollection("tagInfo");
+		DBCollection hashTagInfo = db.getCollection(CollectionReader.returnName("tagInfo"));
 		
 		
 		BasicDBObject query = new BasicDBObject("locations", new BasicDBObject("ward0", tag1));
@@ -259,7 +260,7 @@ public class ResponseMaker {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "deviceBreakdown" );
 		DBCollection coll;
-		coll = db.getCollection("devicesForBoroughs");
+		coll = db.getCollection(CollectionReader.returnName("devicesForBoroughs"));
 		Gson gson = new Gson();
 		
 		BasicDBObject query = new BasicDBObject("borough", code);
@@ -270,7 +271,7 @@ public class ResponseMaker {
 	public String getDevice() throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "deviceBreakdown" );
-		DBCollection coll = db.getCollection("deviceList");
+		DBCollection coll = db.getCollection(CollectionReader.returnName("deviceList"));
 		Gson gson = new Gson();
 		return gson.toJson(coll.findOne().get("list"));
 	}
@@ -278,7 +279,7 @@ public class ResponseMaker {
 	public String getDeviceFactors(String deviceName) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "deviceBreakdown" );
-		DBCollection coll = db.getCollection("deviceFactors");
+		DBCollection coll = db.getCollection(CollectionReader.returnName("deviceFactors"));
 		
 		BasicDBObject query = new BasicDBObject("locations", new BasicDBObject("ward0", deviceName));
 		

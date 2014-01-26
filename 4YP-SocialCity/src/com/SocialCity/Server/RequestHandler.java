@@ -115,7 +115,7 @@ public class RequestHandler extends AbstractHandler {
 		
 		//new ExcelParsing().parse();
 		//System.out.println(HashTag.getTagList());
-		//new TweetByArea().createDeviceList();
+		//System.out.println(new TweetByArea().reTweets());
 		//new TweetByArea().deviceBreakdown();
 		//new TweetByArea().deviceFactors();
 		/*BasicDBObject query = new BasicDBObject("source", "<a href=\"http://www.handmark.com\" rel=\"nofollow\">TweetCaster for iOS</a>");

@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.SocialCity.Area.CodeNameMap;
+import com.SocialCity.DataParsers.CollectionReader;
 import com.SocialCity.SocialFactor.SocialFactors;
 import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
@@ -22,7 +23,7 @@ public class HashTag {
 	
 	public HashTag(){}
 	
-	public static void topHashTags() throws UnknownHostException{
+	public static void topHashTags(String tweetsName, String hashTagName, String topTagsName, String tagListName) throws UnknownHostException{
 		HashMap<String, Integer> tagMap = new HashMap<String, Integer> ();
 		int count;
 		BasicDBObject dbo;
@@ -32,9 +33,8 @@ public class HashTag {
 		DBCollection coll = null;
 		DBCollection sortedColl = null;
 		DBCollection tagList = null;
-		coll = db.getCollection("tweets");
+		coll = db.getCollection(tweetsName);
 		
-
 		BasicDBObject query = new BasicDBObject();
 		query.put("text",new BasicDBObject("$regex", String.format(".*((?i)%s).*", "#")));
 		DBCursor dbC = coll.find(query);
@@ -58,9 +58,7 @@ public class HashTag {
 			System.out.println(k + "  " + tagMap.get(k));
 		}
 		
-		
-		coll = db.createCollection("hashTag", null);
-		coll.drop();
+		coll = db.createCollection(hashTagName, null);
 		
 		for (String k : tagMap.keySet()) {
 			dbo = new BasicDBObject();
@@ -70,12 +68,11 @@ public class HashTag {
 		}
 		
 		dbC = coll.find().sort(new BasicDBObject("count", -1));
-		sortedColl = db.getCollection("topHashTags");
-		sortedColl.drop();
-		sortedColl = db.createCollection("topHashTags", null);
-		tagList = db.getCollection("tagList");
-		tagList.drop();
-		tagList = db.createCollection("tagList", null);
+		
+		
+		sortedColl = db.createCollection(topTagsName, null);
+		tagList = db.createCollection(tagListName, null);
+		
 		BasicDBObject tag;
 		ArrayList<String> names = new ArrayList<String>();
 		while (dbC.hasNext()) {
@@ -94,7 +91,7 @@ public class HashTag {
 		MongoClient mongoClient;
 		mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
-		DBCollection coll = db.getCollection("tagList");
+		DBCollection coll = db.getCollection(CollectionReader.returnName("tagsList"));
 		
 		ArrayList<String> names = (ArrayList<String>) ((BasicDBObject) coll.findOne()).get("tags");
 		
@@ -102,21 +99,20 @@ public class HashTag {
 		return gson.toJson(names);
 	}
 	
-	public static void tagLocationInfo() throws UnknownHostException {
+	public static void tagLocationInfo(String tweetsName, String tagInfoName, String topTagName) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
-		DBCollection coll = db.getCollection("topHashTags");
-		DBCollection tweets = db.getCollection("tweets");
+		DBCollection coll = db.getCollection(topTagName);
+		DBCollection tweets = db.getCollection(tweetsName);
 		
-		DBCollection hashTagInfo = db.getCollection("tagInfo");
-		hashTagInfo.drop();
-		hashTagInfo = db.createCollection("tagInfo", null);
+		DBCollection hashTagInfo = db.createCollection(tagInfoName, null);
+		
 		int tagCount = 0;
 		boolean relevant;
 		DBCursor dbC = coll.find();
 		DBCursor results;
 		DB areas = mongoClient.getDB("areas");
-		DBCollection boroughs = areas.getCollection("boroughs");
+		DBCollection boroughs = areas.getCollection(CollectionReader.returnName("boroughsCollection"));
 		HashMap<String, Integer> placeRatio;
 		String placeName;
 		CodeNameMap cnm = new CodeNameMap();

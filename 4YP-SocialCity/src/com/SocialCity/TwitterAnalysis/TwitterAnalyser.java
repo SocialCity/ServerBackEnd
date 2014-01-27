@@ -141,7 +141,7 @@ public class TwitterAnalyser {
 			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.UNMATCHED);
 	}
 	
-	public TweetScore analyse_tweet(String tweet){
+	private TweetScore analyse_tweet(String tweet){
 		//analyse a tweet
 
 		//squeeze whitespace and tokenize tweet
@@ -269,8 +269,33 @@ public class TwitterAnalyser {
 	}
 
 	public Tweet_Info_Bloc analyse_tweets(ArrayList<Tweet_Obj> tweets){
-		return null;
+		
+		//arraylist used for the scores of individual tweets
+		ArrayList<TweetScore> scores = new ArrayList<TweetScore>(); 
+	
+		//analyse tweets
+		String text = null;
+		Iterator<Tweet_Obj> i = tweets.iterator();
+		while (i.hasNext()){
+			//pass and analyse the tweet
+			scores.add(this.analyse_tweet(i.next().get_Tweet_text()));
+		}
+		
+		//build and return bloc
+		return build_bloc(scores);
 	}
+	
+	private Tweet_Info_Bloc build_bloc(ArrayList<TweetScore> scores){
+		
+		// info bloc containing results
+		Tweet_Info_Bloc results_bloc = new Tweet_Info_Bloc(scores);
+		//add the scores to the bloc
+			
+		return results_bloc;
+		
+	}
+
 }
+
 	
 

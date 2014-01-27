@@ -7,6 +7,8 @@ import java.util.List;
 
 import com.SocialCity.TwitterAnalysis.DAL_Classification;
 import com.SocialCity.TwitterAnalysis.TweetScore;
+import com.SocialCity.TwitterAnalysis.Tweet_Info_Bloc;
+import com.SocialCity.TwitterAnalysis.Tweet_Obj;
 import com.SocialCity.TwitterAnalysis.TwitterAnalyser;
 import com.SocialCity.TwitterAnalysis.Twokenizer;
 import com.mongodb.BasicDBObject;
@@ -23,167 +25,26 @@ public class Test_Analyser {
 	static final String mongoCollection = "tweets";
 	
 	public static void main(String[] args) {
+		
+		//bloc for results
+		Tweet_Info_Bloc result_bloc;
+		
+		//get and prepare tweets
 		ArrayList<String> tweets = getTweets();
-		ArrayList<TweetScore> scores = new ArrayList<TweetScore>(); 
-		
-		//hashmap storing words that were matched and how many times they were matched
-		HashMap<String, Integer> matched_words = new HashMap<String, Integer>();
-		HashMap<String, Integer> hashtag_map = new HashMap<String, Integer>();
-		HashMap<String, Integer> at_tag_map = new HashMap<String, Integer>();
-
-		
-		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt");
-			
-		
-		
-		String text = null;
+		ArrayList<Tweet_Obj> tw_list = new ArrayList<Tweet_Obj>();
 		Iterator<String> i = tweets.iterator();
-		while (i.hasNext()){
-			//pass and analyse the tweet
-			scores.add(ta.analyse_tweet(i.next()));
+		while(i.hasNext()){
+			tw_list.add(new Tweet_Obj(i.next()));
 		}
 		
-		//analytics setup
-		double total_matched_ratio = 0;
-		double total_valience = 0;
-		double total_activity = 0;
-		double total_imagery = 0;
-		double count = 0;
-		double retweet_count = 0;
-		TweetScore tweet_sc = null;
-		Iterator<TweetScore> it_ts = scores.iterator();
+		//build analyser
+		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt");
 		
-		// look at each tweet score
-		while (it_ts.hasNext()){
-			tweet_sc = it_ts.next();
-			
-			//total the number of retweets
-			if (tweet_sc.get_retweet_flag() == true)
-					retweet_count = retweet_count + 1;
-			
-			// total the matched ratios from all tweets
-			total_matched_ratio = total_matched_ratio + tweet_sc.get_matched_ratio();
-			
-			// total the val, act, img values for valid tweets (matched words with the DAL set)
-			if (tweet_sc.get_Dal_classification() == DAL_Classification.VALID){
-				total_valience = total_valience + tweet_sc.get_valience();
-				total_activity = total_activity + tweet_sc.get_active();
-				total_imagery = total_imagery + tweet_sc.get_image();
-				count++;
-			}
-			
+		//analyse tweets
+		result_bloc = ta.analyse_tweets(tw_list);
 		
-				
-			//get an iterator for the words that were matched from the tweet
-			Iterator words_it = tweet_sc.get_words().iterator();
-			
-			//build hashmap of words that were popular
-			while (words_it.hasNext()){
-				String word = (String) words_it.next();
-				if (matched_words.containsKey(word))
-				{
-					int score = matched_words.get(word);
-					score++;
-					matched_words.put(word, score);
-				}
-				else{
-					matched_words.put((String) word, 1);
-				}
-			}
-				
-			 //get an iterator for the hashtags that were matched from the tweet
-			Iterator hashtags_it = tweet_sc.get_hashtags().iterator();
-				
-				//build hashmap of hashtags that were popular
-				while (hashtags_it.hasNext()){
-					String tag = (String) hashtags_it.next();
-					if (hashtag_map.containsKey(tag))
-					{
-						int score = hashtag_map.get(tag);
-						score++;
-						hashtag_map.put(tag, score);
-					}
-					else{
-						hashtag_map.put((String) tag, 1);
-					}
-			}
-				
-			//get an iterator for the at_tags that were matched from the tweet
-			Iterator at_tags_it = tweet_sc.get_at_tags().iterator();
-					
-					//build hashmap of hashtags that were popular
-					while (at_tags_it.hasNext()){
-						String tag = (String) at_tags_it.next();
-						if (at_tag_map.containsKey(tag))
-						{
-							int score = at_tag_map.get(tag);
-							score++;
-							at_tag_map.put(tag, score);
-						}
-						else{
-							at_tag_map.put((String) tag, 1);
-						}
-				}
-		}
-		
-		
-		//analytics over the sentiment analyser
-		
-		double avg_matched_ratio = total_matched_ratio / tweets.size();
-		double avg_valience = total_valience / count;
-		double avg_activity = total_activity / count;
-		double avg_imagery = total_imagery / count;
-		
-		
-		
-		
-		//print out analytic
-		
-		//print out matched words
-				Iterator matched_words_it = matched_words.keySet().iterator();
-				while (matched_words_it.hasNext()){
-					String word = (String) matched_words_it.next();
-	//			System.out.println(word + " " + matched_words.get(word));
-				}
-				
-		//print out hashtags
-				
-				double hashtag_count = 0;
-				double hashtag_total_count = 0;
-				
-				Iterator tags_it = hashtag_map.keySet().iterator();
-				while (tags_it.hasNext()){
-					String hashtag = (String) tags_it.next();
-					hashtag_count++;
-					hashtag_total_count = hashtag_total_count + hashtag_map.get(hashtag);
-	//			System.out.println(hashtag + " " + hashtag_map.get(hashtag));
-				}
-				
-				//print out at_tags
-				
-				double at_tag_count = 0;
-				double at_tag_total_count = 0;
-				
-				Iterator at_tags_it = at_tag_map.keySet().iterator();
-				while (at_tags_it.hasNext()){
-					String at_tag = (String) at_tags_it.next();
-					at_tag_count++;
-					at_tag_total_count = at_tag_total_count + at_tag_map.get(at_tag);
-	//			System.out.println(at_tag + " " + at_tag_map.get(at_tag));
-				}
-		
-		System.out.println("************ averages ***********");
-		System.out.println("average valience: " + avg_valience);
-		System.out.println("average activity: " + avg_activity);
-		System.out.println("average imagery: " + avg_imagery);
-		System.out.println("average matched ratio: " + avg_matched_ratio);
-		System.out.println("Total Number of Tweets: " + tweets.size());
-		System.out.println("DAL valid tweets: " + count);
-		System.out.println("Number of retweets: " + retweet_count);
-		System.out.println("Number of unique hashtags: " + hashtag_count);
-		System.out.println("Number of hashtags: " + hashtag_total_count);
-		System.out.println("Number of unique at_tags: " + at_tag_count);
-		System.out.println("Number of at_tags: " + at_tag_total_count);
+		// ***** print out variables from result_bloc ******* //
+	
 	}
 
 	public static ArrayList getTweets(){

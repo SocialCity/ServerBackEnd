@@ -267,7 +267,10 @@ public class TwitterAnalyser {
 		ts.add_at_tags(AT_tags);
 		return ts;
 	}
-	
+
+	public Tweet_Info_Bloc analyse_tweets(ArrayList<Tweet_Obj> tweets){
+		return null;
+	}
 }
 	
 

@@ -30,7 +30,7 @@ for line in lines:
     value = value.strip()
     value = value.strip('[')
     value = value.strip('%')
-    output.append(value)
+    output.append(line[0] + " " + value)
 
 
 output_file = open("wordnet-core-words.txt", "w", newline='', encoding = 'utf-8')

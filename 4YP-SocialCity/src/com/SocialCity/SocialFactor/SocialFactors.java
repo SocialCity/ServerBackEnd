@@ -12,15 +12,18 @@ public class SocialFactors {
 	private ArrayList<String> location;
 	private double crimeRate;
 	private double housePrice;
-	private double educationRating;
 	private double transportRating;
-	
-	private double meanAge;
 	private double drugRate;
-	private double employmentRate;
-	private double voteTurnout;
+	private double unemploymentRate;
+	private double incapacityBenefit;
 
 	private Emotion sentiment;
+	private double childInNoWorkHouse;
+	private double schoolAbscences;
+	private double GCSEScore;
+	private double deliberateFires;
+	private double incomeSupport;
+	
 	static Gson gson = new Gson();
 	
 	public SocialFactors(String wardCode) {
@@ -28,12 +31,15 @@ public class SocialFactors {
 		location.add(wardCode);
 		crimeRate = -1;
 		housePrice = -1;
-		educationRating = -1;
 		transportRating = -1;
-		meanAge = -1;
 		drugRate = -1;
-		employmentRate = -1;
-		voteTurnout = -1;
+		unemploymentRate = -1;
+		incapacityBenefit = -1;
+		childInNoWorkHouse = -1;
+		schoolAbscences = -1;
+		GCSEScore = -1;
+		deliberateFires = -1;
+		incomeSupport = -1;
 	}
 	
 	public static SocialFactors parseJSON(String location) {
@@ -44,12 +50,15 @@ public class SocialFactors {
 	public SocialFactors(DBObject readIn) {
 		crimeRate = (double) readIn.get("crimeRate");
 		housePrice = (double) readIn.get("housePrice");
-		educationRating = (double) readIn.get("educationRating");
 		transportRating = (double) readIn.get("transportRating");
-		meanAge = (double) readIn.get("meanAge");
 		drugRate = (double) readIn.get("drugRate");
-		employmentRate = (double) readIn.get("employmentRate");
-		voteTurnout = (double) readIn.get("voteTurnout");
+		unemploymentRate = (double) readIn.get("unemploymentRate");
+		incapacityBenefit = (double) readIn.get("incapacityBenefit");
+		childInNoWorkHouse = (double) readIn.get("childInNoWorkHouse");
+		schoolAbscences = (double) readIn.get("schoolAbscences");
+		GCSEScore = (double) readIn.get("GCSEScore");
+		deliberateFires = (double) readIn.get("deliberateFires");
+		incomeSupport = (double) readIn.get("incomeSupport");
 		
 		this.location = new ArrayList<String>();
 		BasicDBObject locations = (BasicDBObject) readIn.get("locations");
@@ -63,7 +72,6 @@ public class SocialFactors {
 	
 	public double getCrimeRate(){return crimeRate;}
 	public double getHousePrice(){return housePrice;}
-	public double getEducationRating(){return educationRating;}
 	public double getTransportRating(){return transportRating;}
 	
 	public ArrayList<String> getLocation(){return location;}
@@ -75,10 +83,6 @@ public class SocialFactors {
 	
 	public void setHousePrice(double housePrice){
 		this.housePrice = housePrice;
-	}
-	
-	public void setEducationRating(double educationRating) {
-		this.educationRating = educationRating;
 	}
 	
 	public void setTransportRating(double transportRating) {
@@ -93,12 +97,15 @@ public class SocialFactors {
 		switch (factorNumber) {
 		case 0: return this.crimeRate;
 		case 1: return this.housePrice;
-		case 2: return this.educationRating;
+		case 2: return this.GCSEScore;
 		case 3: return this.transportRating;
-		case 4: return this.meanAge;
+		case 4: return this.schoolAbscences;
 		case 5: return this.drugRate;
-		case 6: return this.employmentRate;
-		case 7: return this.voteTurnout;
+		case 6: return this.unemploymentRate;
+		case 7: return this.childInNoWorkHouse;
+		case 8: return this.deliberateFires;
+		case 9: return this.incapacityBenefit;
+		case 10: return this.incomeSupport;
 		default: return -1;
 		}
 	}
@@ -107,12 +114,15 @@ public class SocialFactors {
 		switch (factorNumber) {
 		case 0: return "crimeRate";
 		case 1: return "housePrice";
-		case 2: return "educationRating";
+		case 2: return "GCSEScore";
 		case 3: return "transportRating";
-		case 4: return "meanAge";
+		case 4: return "schoolAbscences";
 		case 5: return "drugRate";
-		case 6: return "employmentRate";
-		case 7: return "voteTurnout";
+		case 6: return "unemploymentRate";
+		case 7: return "childInNoWorkHouse";
+		case 8: return "deliberateFires";
+		case 9: return "incapacityBenefit";
+		case 10: return "incomeSupport";
 		default: return "";
 		}
 	}
@@ -132,25 +142,11 @@ public class SocialFactors {
 			housePrice = (housePrice + factors.getHousePrice())/2;
 		}
 		
-		if (educationRating == -1) {
-			educationRating = factors.getEducationRating();
-		}
-		else if (factors.getEducationRating()!= -1) {
-			educationRating = (educationRating + factors.getEducationRating())/2;
-		}
-		
 		if (transportRating == -1) {
 			transportRating = factors.getTransportRating();
 		}
 		else if (factors.getTransportRating() != -1) {
 			transportRating = (transportRating + factors.getTransportRating())/2;
-		}
-		
-		if (meanAge == -1) {
-			meanAge= factors.getMeanAge();
-		}
-		else if (factors.getMeanAge() != -1) {
-			meanAge = (meanAge+ factors.getMeanAge())/2;
 		}
 		
 		if (drugRate== -1) {
@@ -160,20 +156,55 @@ public class SocialFactors {
 			drugRate= (drugRate + factors.getDrugRate())/2;
 		}
 		
-		if (employmentRate == -1) {
-			employmentRate = factors.getEmploymentRate();
+		if (unemploymentRate == -1) {
+			unemploymentRate = factors.getUnemploymentRate();
 		}
-		else if (factors.getEmploymentRate() != -1) {
-			employmentRate = (employmentRate + factors.getEmploymentRate())/2;
+		else if (factors.getUnemploymentRate() != -1) {
+			unemploymentRate = (unemploymentRate + factors.getUnemploymentRate())/2;
 		}
 		
-		if (voteTurnout == -1) {
-			voteTurnout = factors.getVoteTurnout();
+		if (incomeSupport == -1) {
+			incomeSupport = factors.getIncomeSupport();
 		}
-		else if (factors.getVoteTurnout() != -1) {
-			voteTurnout= (voteTurnout+ factors.getVoteTurnout())/2;
+		else if (factors.getIncomeSupport() != -1) {
+			incomeSupport = (incomeSupport + factors.getIncomeSupport())/2;
+		}
+		
+		if (incapacityBenefit == -1) {
+			incapacityBenefit = factors.getIncapacityBenefit();
+		}
+		else if (factors.getIncapacityBenefit() != -1) {
+			incapacityBenefit = (incapacityBenefit + factors.getIncapacityBenefit())/2;
 		}
 
+		if (GCSEScore == -1) {
+			GCSEScore = factors.getGCSEScore();
+		}
+		else if (factors.getGCSEScore() != -1) {
+			GCSEScore = (GCSEScore + factors.getGCSEScore())/2;
+		}
+
+		if (childInNoWorkHouse == -1) {
+			childInNoWorkHouse = factors.getChildInNoWorkHouse();
+		}
+		else if (factors.getChildInNoWorkHouse() != -1) {
+			childInNoWorkHouse = (childInNoWorkHouse + factors.getChildInNoWorkHouse())/2;
+		}
+		
+		if (schoolAbscences == -1) {
+			schoolAbscences = factors.getSchoolAbscences();
+		}
+		else if (factors.getSchoolAbscences() != -1) {
+			schoolAbscences = (schoolAbscences + factors.getSchoolAbscences())/2;
+		}
+		
+		if (deliberateFires == -1) {
+			deliberateFires = factors.getDeliberateFires();
+		}
+		else if (factors.getDeliberateFires() != -1) {
+			deliberateFires = (deliberateFires + factors.getDeliberateFires())/2;
+		}
+		
 		//sentiment.averageSentiments(factors.getSentiment());
 		location.addAll(factors.getLocation());
 	}
@@ -187,39 +218,20 @@ public class SocialFactors {
 		}
 		
 		factors.append("locations", locations);
-		factors.append("educationRating", educationRating);
 		factors.append("transportRating", transportRating);
 		factors.append("housePrice", housePrice);
 		factors.append("crimeRate", crimeRate);
-		factors.append("meanAge", meanAge);
-		factors.append("employmentRate", employmentRate);
+		factors.append("unemploymentRate", unemploymentRate);
 		factors.append("drugRate", drugRate);
-		factors.append("voteTurnout", voteTurnout);
 		return factors;
 	}
 
-	public double getMeanAge() {
-		return meanAge;
+	public double getUnemploymentRate() {
+		return unemploymentRate;
 	}
 
-	public void setMeanAge(double meanAge) {
-		this.meanAge = meanAge;
-	}
-
-	public double getEmploymentRate() {
-		return employmentRate;
-	}
-
-	public void setEmploymentRate(double employmentRate) {
-		this.employmentRate = employmentRate;
-	}
-
-	public double getVoteTurnout() {
-		return voteTurnout;
-	}
-
-	public void setVoteTurnout(double voteTurnout) {
-		this.voteTurnout = voteTurnout;
+	public void setUnemploymentRate(double unemploymentRate) {
+		this.unemploymentRate = unemploymentRate;
 	}
 
 	public double getDrugRate() {
@@ -228,5 +240,64 @@ public class SocialFactors {
 
 	public void setDrugRate(double drugRate) {
 		this.drugRate = drugRate;
+	}
+
+	public void setIncapacityBenefit(double incapacityBenefit) {
+		this.incapacityBenefit = incapacityBenefit;
+		
+	}
+	
+	public double getIncapacityBenefit() {
+		return incapacityBenefit;
+	}
+
+	public void setIncomeSupport(double incomeSupport) {
+		this.incomeSupport = incomeSupport;
+		
+	}
+	
+	public double getIncomeSupport() {
+		return incomeSupport;
+		
+	}
+
+	public void setDeliberateFires(double deliberateFires) {
+		this.deliberateFires = deliberateFires;
+		
+	}
+	
+	public double getDeliberateFires() {
+		return deliberateFires;
+		
+	}
+
+	public double getGCSEScore() {
+		return GCSEScore;
+		
+	}
+	
+	public void setGCSEScore(double GCSEScore) {
+		this.GCSEScore = GCSEScore;
+		
+	}
+
+	public void setSchoolAbscences(double schoolAbscences) {
+		this.schoolAbscences = schoolAbscences;
+		
+	}
+
+	public double getSchoolAbscences() {
+		return schoolAbscences;
+		
+	}
+	
+	public void setChildInNoWorkHouse(double childInNoWorkHouse) {
+		this.childInNoWorkHouse = childInNoWorkHouse;
+		
+	}
+	
+	public double getChildInNoWorkHouse() {
+		return childInNoWorkHouse;
+		
 	}
 }

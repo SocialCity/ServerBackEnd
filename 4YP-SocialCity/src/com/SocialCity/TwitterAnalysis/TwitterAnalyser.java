@@ -18,15 +18,25 @@ public class TwitterAnalyser {
 	//hash map containing the DAL scores
 	private HashMap<String, WordScore> DAL_hashmap = new HashMap<String, WordScore>();
 	// hash set containing the words in the wordnet core dictionary
-	private HashSet<String> Wordnet_hashset = new HashSet<String>();
+	private HashSet<String> Wordnet_noun_hashset = new HashSet<String>();
+	private HashSet<String> Wordnet_adjective_hashset = new HashSet<String>();
+	private HashSet<String> Wordnet_verb_hashset = new HashSet<String>();
+
+
 	private Twokenizer tw = null;
 
 	public TwitterAnalyser(String DAL_file_path, String Wordnet_file_path){
 		//build the hash set used for analysis
 		ArrayList<WordScore> DAL_scores = readDAL(DAL_file_path);
-		ArrayList<String> wordnet_words = readWordNet(Wordnet_file_path);
+		ArrayList<String> wordnet_noun_words = readWordNet(Wordnet_file_path, "n");
+		ArrayList<String> wordnet_verb_words = readWordNet(Wordnet_file_path, "v");
+		ArrayList<String> wordnet_adjective_words = readWordNet(Wordnet_file_path, "a");
+
 		buildHashMap(DAL_hashmap, DAL_scores);
-		buildHashSet(Wordnet_hashset, wordnet_words);
+		buildHashSet(Wordnet_noun_hashset, wordnet_noun_words);
+		buildHashSet(Wordnet_verb_hashset, wordnet_verb_words);
+		buildHashSet(Wordnet_adjective_hashset, wordnet_adjective_words);
+
 		//build twokenizer
 		tw = new Twokenizer();
 	}
@@ -52,7 +62,7 @@ public class TwitterAnalyser {
 	}
 	
 	//read in wordnet list and return an arraylist of words
-	private ArrayList<String> readWordNet(String file){
+	private ArrayList<String> readWordNet(String file, String start_symbol){
 		BufferedReader br;
 		String line;
 		ArrayList<String> words = new ArrayList<String>();
@@ -62,9 +72,13 @@ public class TwitterAnalyser {
 			br = new BufferedReader(new FileReader(file));
 			while ((line = br.readLine()) != null) {
 				if (!line.startsWith("#")){
-					
+					if (line.startsWith(start_symbol)){
+					line = line.substring(1);
 					line = squeezeWhitespace(line);
 					words.add(line);
+					System.out.println(line);
+					}
+				
 				}
 			}
 			br.close();
@@ -112,33 +126,64 @@ public class TwitterAnalyser {
 	private WordScore analyse_token(String token){
 		//analyse individual word/token
 		token = token.toLowerCase();
-
+		ArrayList<W_Classification> classifications = new ArrayList<W_Classification>();
+		WordScore result = null;
 		//is a matched word in the DAL set
 		if (DAL_hashmap.containsKey(token)){
 			//word is in the map set, return the wordscore object held in the hashmap
-			return DAL_hashmap.get(token);
+			result =  DAL_hashmap.get(token);
 		}
 		// is a matched word in the Wordnet Core
-		if (Wordnet_hashset.contains(token)){
-			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.WORDNET);
+		if (Wordnet_noun_hashset.contains(token)){
+			classifications.add(W_Classification.WORDNET_NOUN);
+		}
+		if (Wordnet_verb_hashset.contains(token)){
+			classifications.add(W_Classification.WORDNET_VERB);
+		}
+		if (Wordnet_adjective_hashset.contains(token)){
+			classifications.add(W_Classification.WORDNET_ADJ);
 		}
 		//is a hastag
 		if (token.startsWith("#")){
-			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.HASHTAG);
+			classifications.add(W_Classification.HASHTAG);
 		}
 		//retweet
-		if (token.equals("rt") || token.equals("retweet"))
+		if (token.equals("rt") || token.equals("retweet") || token.equals("retwet")|| token.equals("ret"))
 		{
-			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.RETWEET);
+			classifications.add(W_Classification.RETWEET);
 		}
 		//directed @ tweet
 		if (token.startsWith("@"))
 		{
-			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.ATSymbol);
+			classifications.add(W_Classification.ATSymbol);
 		}
 		
-		else 			// no word in mapset, return invalid wordscore object
-			return new WordScore(token, -1.0, -1.0, -1.0, W_Classification.UNMATCHED);
+		//generate output
+		
+		if(result == null){
+			if (classifications.size() == 0){
+				//no match
+				result = new WordScore(token, -1.0, -1.0, -1.0, W_Classification.UNMATCHED);
+			}
+			if (classifications.size() >= 1){
+				//got a classification (or more) but not DAL
+				result = new WordScore(token, -1.0, -1.0, -1.0, classifications.get(0));
+				for (int i = 1; i<classifications.size();  i++)
+				{
+					result.add_classification(classifications.get(i));
+				}	
+			}
+		else{
+			//return DAL plus any other classifications
+			for (int i = 0; i<classifications.size()-1;  i++)
+				{
+					result.add_classification(classifications.get(i));
+				}
+			}
+	}		
+
+		
+		return result;
 	}
 	
 	private TweetScore analyse_tweet(String tweet){
@@ -154,9 +199,11 @@ public class TwitterAnalyser {
 		ArrayList<WordScore> token_scores = new ArrayList<WordScore>();
 		
 		//arraylist for holding matched words from the tweet
-		ArrayList<String> matched_words = new ArrayList<String>();
-		
-		
+		ArrayList<String> matched_DAL_words = new ArrayList<String>();
+		ArrayList<String> matched_nouns = new ArrayList<String>();
+		ArrayList<String> matched_verbs = new ArrayList<String>();
+		ArrayList<String> matched_adjectives = new ArrayList<String>();
+
 		//*************************************************************************************//
 		//*************** Put all tokens through the analyse_token method                   ***//
 		//*************** Returning token_scores for all tokens (even if invalid/unmatched) ***//
@@ -196,29 +243,41 @@ public class TwitterAnalyser {
 			total_count++;
 			score = it_ws.next();
 			// check if DAL word
-			if (score.get_classification() == W_Classification.DAL_WORD){
+			
+			if (score.get_classification().contains(W_Classification.DAL_WORD)){
 				DAL_count++;
 				total_matched_words++;
 				total_active = total_active + score.get_active();
 				total_val = total_val + score.get_valience();
 				total_image = total_image + score.get_image();
-				matched_words.add(score.get_word());
+				matched_DAL_words.add(score.get_word());
 			}
 			// check if WordNet word
-			else if (score.get_classification() == W_Classification.WORDNET)
+			if ((score.get_classification().contains(W_Classification.WORDNET_NOUN)))
 			{
-				matched_words.add(score.get_word());
+				matched_nouns.add(score.get_word());
 				total_matched_words++;
 			}
-			else if (score.get_classification() == W_Classification.HASHTAG){
+			if ((score.get_classification().contains(W_Classification.WORDNET_VERB)))
+			{
+				matched_verbs.add(score.get_word());
+				total_matched_words++;
+			}
+			if ((score.get_classification().contains(W_Classification.WORDNET_ADJ)))
+			{
+				matched_adjectives.add(score.get_word());
+				total_matched_words++;
+			}
+			
+			else if (score.get_classification().contains(W_Classification.HASHTAG)){
 				hashtags.add(score.get_word());
 				total_matched_words++;
 			}
-			else if (score.get_classification() == W_Classification.RETWEET){
+			else if (score.get_classification().contains(W_Classification.RETWEET)){
 				retweet = true;
 				total_matched_words++;
 			}
-			else if (score.get_classification() == W_Classification.ATSymbol){
+			else if (score.get_classification().contains(W_Classification.ATSymbol)){
 				AT_tags.add(score.get_word());
 				total_matched_words++;
 				
@@ -262,7 +321,10 @@ public class TwitterAnalyser {
 				
 		//build new tweet score object and return it
 		TweetScore ts =  new TweetScore(tweet, avg_val, avg_active, avg_image, matched_ratio, dal_classification, retweet);
-		ts.add_matched_words(matched_words);
+		ts.set_matched_DAL_words(matched_DAL_words);
+		ts.set_Matched_nouns(matched_nouns);
+		ts.set_Matched_verbs(matched_verbs);
+		ts.set_Matched_adjectives(matched_adjectives);
 		ts.add_hashtags(hashtags);
 		ts.add_at_tags(AT_tags);
 		return ts;

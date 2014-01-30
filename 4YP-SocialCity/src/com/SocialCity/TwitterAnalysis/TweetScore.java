@@ -13,9 +13,12 @@ public class TweetScore {
 	private Double active = null;
 	private Double image = null;
 	private Double matched_ratio = null;
-	private ArrayList<String> matched_words = new ArrayList();
-	private ArrayList<String> hashtags = new ArrayList();
-	private ArrayList<String> AT_tags = new ArrayList();
+	private ArrayList<String> matched_DAL_words = new ArrayList<String>();
+	private ArrayList<String> matched_nouns = new ArrayList<String>();
+	private ArrayList<String> matched_verbs = new ArrayList<String>();
+	private ArrayList<String> matched_adjectives = new ArrayList<String>();
+	private ArrayList<String> hashtags = new ArrayList<String>();
+	private ArrayList<String> AT_tags = new ArrayList<String>();
 
 	
 	private T_Classification t_classification = null;
@@ -68,19 +71,6 @@ public class TweetScore {
 		return hashtags;
 	}
 	
-	public void add_matched_word(String word){
-		matched_words.add(word);
-	}
-	
-	public void add_matched_words(ArrayList<String> words){
-		matched_words.addAll(words);
-	}
-	
-	public ArrayList get_words(){
-		return matched_words;
-	}
-	
-
 	public String get_tweet(){
 		return tweet;
 	}
@@ -104,6 +94,38 @@ public class TweetScore {
 
 	public DAL_Classification get_Dal_classification() {
 		return dal_classification;
+	}
+
+	public ArrayList<String> get_Matched_nouns() {
+		return matched_nouns;
+	}
+
+	public void set_Matched_nouns(ArrayList<String> matched_nouns) {
+		this.matched_nouns = matched_nouns;
+	}
+
+	public ArrayList<String> get_Matched_verbs() {
+		return matched_verbs;
+	}
+
+	public void set_Matched_verbs(ArrayList<String> matched_verbs) {
+		this.matched_verbs = matched_verbs;
+	}
+
+	public ArrayList<String> get_Matched_adjectives() {
+		return matched_adjectives;
+	}
+
+	public void set_Matched_adjectives(ArrayList<String> matched_adjectives) {
+		this.matched_adjectives = matched_adjectives;
+	}
+
+	public ArrayList<String> get_matched_DAL_words() {
+		return matched_DAL_words;
+	}
+
+	public void set_matched_DAL_words(ArrayList<String> matched_DAL_words) {
+		this.matched_DAL_words = matched_DAL_words;
 	}
 
 	

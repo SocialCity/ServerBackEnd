@@ -30,18 +30,18 @@ public class Test_Analyser {
 		Tweet_Info_Bloc result_bloc;
 		
 		//get and prepare tweets
-		ArrayList<String> tweets = getTweets();
-		ArrayList<Tweet_Obj> tw_list = new ArrayList<Tweet_Obj>();
-		Iterator<String> i = tweets.iterator();
-		while(i.hasNext()){
-			tw_list.add(new Tweet_Obj(i.next()));
-		}
+//		ArrayList<String> tweets = getTweets();
+//		ArrayList<Tweet_Obj> tw_list = new ArrayList<Tweet_Obj>();
+//		Iterator<String> i = tweets.iterator();
+//		while(i.hasNext()){
+//			tw_list.add(new Tweet_Obj(i.next()));
+//		}
 		
 		//build analyser
 		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt");
 		
 		//analyse tweets
-		result_bloc = ta.analyse_tweets(tw_list);
+//		result_bloc = ta.analyse_tweets(tw_list);
 		
 		// ***** print out variables from result_bloc ******* //
 	

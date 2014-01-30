@@ -22,6 +22,7 @@ filename = filedialog.askopenfilename()
 os.chdir(os.path.dirname(filename))
 lines = getLines(filename)
 
+
 output = []
 
 for line in lines:
@@ -34,7 +35,7 @@ for line in lines:
 
 
 output_file = open("wordnet-core-words.txt", "w", newline='', encoding = 'utf-8')
-output_file.write("#this file contains the 5000 words from the wordnet-core dictionary\n")
+output_file.write("#this file contains the 5000 words from the wordnet-core dictionary, including duplicates\n")
 for line in output:
     output_file.write(line + "\n")
 output_file.close

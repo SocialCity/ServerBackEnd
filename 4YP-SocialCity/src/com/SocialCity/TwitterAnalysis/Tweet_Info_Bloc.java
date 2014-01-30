@@ -21,7 +21,6 @@ public class Tweet_Info_Bloc {
 		Iterator<TweetScore> it_ts= scores.iterator();
 		TweetScore tweet_sc;
 		
-		
 		//************calculate totals and averages********************//
 		double total_valience =  0;
 		double total_activity = 0;
@@ -34,8 +33,7 @@ public class Tweet_Info_Bloc {
 			tweet_sc = it_ts.next();
 			
 			// total the matched ratios from all tweets
-			total_matched_ratio = total_matched_ratio + tweet_sc.get_matched_ratio();
-			
+			total_matched_ratio = total_matched_ratio + tweet_sc.get_matched_ratio();	
 			// total the val, act, img values for valid tweets (matched words with the DAL set)
 			if (tweet_sc.get_Dal_classification() == DAL_Classification.VALID){
 				total_valience = total_valience + tweet_sc.get_valience();
@@ -52,6 +50,15 @@ public class Tweet_Info_Bloc {
 		mean_imagery = total_imagery / count;
 		//************finished calculating totals and averages********************//
 		
+		/* for each tweet score
+		 * - single sortable object per word
+		 * - extract and store words in sortable object (sortable by frequncy)
+		 * - store the DAL scores for the word
+		 * - calculate statisitcs over the word
+		 * 
+		 * 
+		*/
+		
 	}
 
 	public ArrayList<TweetScore> get_tweet_scores() {
@@ -62,22 +69,17 @@ public class Tweet_Info_Bloc {
 		return mean_matched_ratio;
 	}
 
-
 	public double get_mean_valience() {
 		return mean_valience;
 	}
-
 
 	public double get_mean_activity() {
 		return mean_activity;
 	}
 
-
 	public double get_mean_imagery() {
 		return mean_imagery;
 	}
-
-
 
 	public String get_bloc_name() {
 		return bloc_name;
@@ -86,6 +88,4 @@ public class Tweet_Info_Bloc {
 	public void set_bloc_name(String name) {
 		bloc_name = name;
 	}
-
-	
 }

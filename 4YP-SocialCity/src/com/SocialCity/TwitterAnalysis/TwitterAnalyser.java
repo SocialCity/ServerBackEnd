@@ -89,7 +89,6 @@ public class TwitterAnalyser {
 	}
 	
 	
-	
 	//read in the DAL file and return a set of word scores
 	private ArrayList<WordScore> readDAL(String file){
 		BufferedReader br;

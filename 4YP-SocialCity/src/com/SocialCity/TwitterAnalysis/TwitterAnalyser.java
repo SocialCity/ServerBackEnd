@@ -41,7 +41,7 @@ public class TwitterAnalyser {
 		tw = new Twokenizer();
 	}
 		
-		//remove large amounts of whitespace down to a single space
+	//remove large amounts of whitespace down to a single space
 	public String squeezeWhitespace(String input) {
 		Matcher whitespaceMatcher = Whitespace.matcher(input);
 		return whitespaceMatcher.replaceAll(" ").trim();
@@ -87,8 +87,7 @@ public class TwitterAnalyser {
 		}
 		return words;
 	}
-	
-	
+		
 	//read in the DAL file and return a set of word scores
 	private ArrayList<WordScore> readDAL(String file){
 		BufferedReader br;

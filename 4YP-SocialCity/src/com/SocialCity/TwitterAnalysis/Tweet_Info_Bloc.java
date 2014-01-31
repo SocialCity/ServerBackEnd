@@ -1,6 +1,8 @@
 package com.SocialCity.TwitterAnalysis;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 
 //used to collect all the information gained from analysing a set of tweets
@@ -14,6 +16,12 @@ public class Tweet_Info_Bloc {
 	private double mean_imagery;
 	
 	private ArrayList<TweetScore> scores;
+	
+	private HashMap<String, Word_Stats> adjective_map = new HashMap<String,Word_Stats>();
+	private HashMap<String, Word_Stats> dal_map = new HashMap<String,Word_Stats>();
+	private HashMap<String, Word_Stats> noun_map = new HashMap<String,Word_Stats>();
+	private HashMap<String, Word_Stats> verb_map = new HashMap<String,Word_Stats>();
+
 	
 	Tweet_Info_Bloc(ArrayList<TweetScore> scores){
 		// store scores
@@ -40,27 +48,81 @@ public class Tweet_Info_Bloc {
 				total_activity = total_activity + tweet_sc.get_active();
 				total_imagery = total_imagery + tweet_sc.get_image();
 				count++;
+			//************** finished taking totals ***************************//
+				
+			//**************** start analysing per word found in each tweet score object ****** //
+			Iterator<String> dal_words = tweet_sc.get_matched_DAL_words().iterator();
+			Iterator<String> adjectives = tweet_sc.get_Matched_adjectives().iterator();
+			Iterator<String> verbs  = tweet_sc.get_Matched_verbs().iterator();
+			Iterator<String> nouns = tweet_sc.get_Matched_nouns().iterator();
+			
+			while (dal_words.hasNext()){
+				String word = dal_words.next();
+				if(dal_map.containsKey(word)){
+					dal_map.get(word).add_score(tweet_sc);
+				}
+				else{
+					Word_Stats n = new Word_Stats(word);
+					n.add_score(tweet_sc);
+					dal_map.put(word, n);
+				}
+			}
+			
+			while (adjectives.hasNext()){
+				String word = adjectives.next();
+				if(adjective_map.containsKey(word)){
+					adjective_map.get(word).add_score(tweet_sc);
+				}
+				else{
+					Word_Stats n = new Word_Stats(word);
+					n.add_score(tweet_sc);
+					adjective_map.put(word, n);
+				}
+			}
+			
+			while (nouns.hasNext()){
+				String word = nouns.next();
+				if(noun_map.containsKey(word)){
+					noun_map.get(word).add_score(tweet_sc);
+				}
+				else{
+					Word_Stats n = new Word_Stats(word);
+					n.add_score(tweet_sc);
+					noun_map.put(word, n);
+				}
+			}
+			
+			while (verbs.hasNext()){
+				String word = verbs.next();
+				if(verb_map.containsKey(word)){
+					verb_map.get(word).add_score(tweet_sc);
+				}
+				else{
+					Word_Stats n = new Word_Stats(word);
+					n.add_score(tweet_sc);
+					verb_map.put(word, n);
+				}
+			}
+			
+				
 			}
 		}
 		
-		//store averages
+		//calculate and store total averages
 		mean_matched_ratio = total_matched_ratio / scores.size();
 		mean_valience = total_valience / count;
 		mean_activity = total_activity / count;
 		mean_imagery = total_imagery / count;
-		//************finished calculating totals and averages********************//
 		
-		/* for each tweet score
-		 * - single sortable object per word
-		 * - extract and store words in sortable object (sortable by frequncy)
-		 * - store the DAL scores for the word
-		 * - calculate statisitcs over the word
-		 * 
-		 * 
-		*/
-		
+				
 	}
 
+	public ArrayList<Word_Stats> get_adjective_stats_freqsorted(){
+		ArrayList<Word_Stats> sorted = new ArrayList<Word_Stats>(adjective_map.values());
+		Collections.sort(sorted);
+		return sorted;
+	}
+	
 	public ArrayList<TweetScore> get_tweet_scores() {
 		return scores;
 	}

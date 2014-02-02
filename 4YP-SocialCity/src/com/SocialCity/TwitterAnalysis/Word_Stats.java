@@ -6,9 +6,9 @@ import java.util.Iterator;
 public class Word_Stats implements Comparable<Word_Stats> {
 
 	private String word; //the actual word
-	private Integer frequency; // how often the word is used
-	private Integer retweet_freq; // how often the word is used in a retweet tweet
-	private Integer DAL_valid_freq; // how often the word is used in DAL valid tweets
+	private int frequency; // how often the word is used
+	private int retweet_freq; // how often the word is used in a retweet tweet
+	private int DAL_valid_freq; // how often the word is used in DAL valid tweets
 	
 	private ArrayList<Double> DAL_activity; // a list of the activity scores that tweets have with the word in
 	private ArrayList<Double> DAL_image; // a list of the image scores that tweets have with the word in
@@ -28,6 +28,9 @@ public class Word_Stats implements Comparable<Word_Stats> {
 
 	public Word_Stats(String word){
 		this.word = word;
+		this.DAL_activity = new ArrayList<Double>();
+		this.DAL_image = new ArrayList<Double>();
+		this.DAL_valience = new ArrayList<Double>();
 	}
 	
 	public Double get_valience_mean(){
@@ -89,7 +92,8 @@ public class Word_Stats implements Comparable<Word_Stats> {
 	
 	@Override
 	public int compareTo(Word_Stats stat) {
-		return frequency.compareTo(stat.get_Frequency());
+		Integer f = new Integer(frequency);
+		return f.compareTo(stat.get_Frequency());
 	}
 
 	public int get_Frequency() {

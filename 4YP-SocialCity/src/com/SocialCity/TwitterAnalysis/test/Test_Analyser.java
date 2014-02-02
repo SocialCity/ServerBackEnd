@@ -30,19 +30,28 @@ public class Test_Analyser {
 		Tweet_Info_Bloc result_bloc;
 		
 		//get and prepare tweets
-//		ArrayList<String> tweets = getTweets();
-//		ArrayList<Tweet_Obj> tw_list = new ArrayList<Tweet_Obj>();
-//		Iterator<String> i = tweets.iterator();
-//		while(i.hasNext()){
-//			tw_list.add(new Tweet_Obj(i.next()));
-//		}
+		ArrayList<String> tweets = getTweets();
+		ArrayList<Tweet_Obj> tw_list = new ArrayList<Tweet_Obj>();
+		Iterator<String> i = tweets.iterator();
+		while(i.hasNext()){
+			tw_list.add(new Tweet_Obj(i.next()));
+		}
 		
 		//build analyser
 		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt");
 		
 		//analyse tweets
-//		result_bloc = ta.analyse_tweets(tw_list);
+		result_bloc = ta.analyse_tweets(tw_list);
 		
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(1).get_word());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(1).get_Frequency());
+		
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(4).get_word());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(4).get_Frequency());
+		
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(1).get_word());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(1).get_Frequency());
+
 		// ***** print out variables from result_bloc ******* //
 	
 	}

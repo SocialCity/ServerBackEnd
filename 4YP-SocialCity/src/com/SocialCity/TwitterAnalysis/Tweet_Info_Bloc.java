@@ -118,8 +118,42 @@ public class Tweet_Info_Bloc {
 	}
 
 	public ArrayList<Word_Stats> get_adjective_stats_freqsorted(){
+		//returns a sorted list of adjectives, sorted in descending order of frequency
+		
+		//build array list from adjective map set values
 		ArrayList<Word_Stats> sorted = new ArrayList<Word_Stats>(adjective_map.values());
 		Collections.sort(sorted);
+		Collections.reverse(sorted);
+		return sorted;
+	}
+	
+	public ArrayList<Word_Stats> get_noun_stats_freqsorted(){
+		//returns a sorted list of adjectives, sorted in descending order of frequency
+		
+		//build array list from adjective map set values
+		ArrayList<Word_Stats> sorted = new ArrayList<Word_Stats>(noun_map.values());
+		Collections.sort(sorted);
+		Collections.reverse(sorted);
+		return sorted;
+	}
+	
+	public ArrayList<Word_Stats> get_verb_stats_freqsorted(){
+		//returns a sorted list of adjectives, sorted in descending order of frequency
+		
+		//build array list from adjective map set values
+		ArrayList<Word_Stats> sorted = new ArrayList<Word_Stats>(verb_map.values());
+		Collections.sort(sorted);
+		Collections.reverse(sorted);
+		return sorted;
+	}
+	
+	public ArrayList<Word_Stats> get_DAL_stats_freqsorted(){
+		//returns a sorted list of adjectives, sorted in descending order of frequency
+		
+		//build array list from adjective map set values
+		ArrayList<Word_Stats> sorted = new ArrayList<Word_Stats>(dal_map.values());
+		Collections.sort(sorted);
+		Collections.reverse(sorted);
 		return sorted;
 	}
 	

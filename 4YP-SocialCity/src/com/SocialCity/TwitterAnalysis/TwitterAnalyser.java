@@ -76,7 +76,7 @@ public class TwitterAnalyser {
 					line = line.substring(1);
 					line = squeezeWhitespace(line);
 					words.add(line);
-					System.out.println(line);
+				//	System.out.println(line);
 					}
 				
 				}

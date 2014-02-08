@@ -6,9 +6,11 @@ import java.net.UnknownHostException;
 import com.SocialCity.DataParsers.CollectionReader;
 import com.SocialCity.TwitterAnalysis.HashTag;
 import com.SocialCity.TwitterAnalysis.TweetByArea;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 public class Updaters {
@@ -21,17 +23,28 @@ public class Updaters {
 	public static void update(String tweetName) throws UnknownHostException {
 		
 		String date= new java.util.Date().toString();
+		
+		MongoClient mongoClient;
+		mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "updates" );
+		DBCollection coll = db.getCollection("times");
+		DBObject dbo = new BasicDBObject();
+		
 		date = date.replace(" ", "_");
+		
+		dbo.put("date", date.toString());
+		coll.insert(dbo);
+		
 		TweetByArea tba = new TweetByArea();
 		
-		String hashTagName = "hashTag_" + date;
-		String topTagsName = "topHashTags_" + date;
-		String tagListName = "tagList_" + date;
-		String tagInfoName = "tagInfo_" + date;
-		String propName = "tweetProportions_" + date;
-		String devFacName = "deviceFactors_" + date;
-		String devListName = "deviceList_" + date;
-		String devForBoName = "devicesForBoroughs_" + date;
+		String hashTagName = "hashTag_" + date.toString();
+		String topTagsName = "topHashTags_" + date.toString();
+		String tagListName = "tagList_" + date.toString();
+		String tagInfoName = "tagInfo_" + date.toString();
+		String propName = "tweetProportions_" + date.toString();
+		String devFacName = "deviceFactors_" + date.toString();
+		String devListName = "deviceList_" + date.toString();
+		String devForBoName = "devicesForBoroughs_" + date.toString();
 		
 		HashTag.topHashTags(tweetName,hashTagName,topTagsName,tagListName); 
 		HashTag.tagLocationInfo(tweetName, tagInfoName, topTagsName);

@@ -13,7 +13,6 @@ public class SocialFactors {
 	private double crimeRate;
 	private double housePrice;
 	private double transportRating;
-	private double drugRate;
 	private double unemploymentRate;
 	private double incapacityBenefit;
 
@@ -32,7 +31,6 @@ public class SocialFactors {
 		crimeRate = -1;
 		housePrice = -1;
 		transportRating = -1;
-		drugRate = -1;
 		unemploymentRate = -1;
 		incapacityBenefit = -1;
 		childInNoWorkHouse = -1;
@@ -51,7 +49,6 @@ public class SocialFactors {
 		crimeRate = (double) readIn.get("crimeRate");
 		housePrice = (double) readIn.get("housePrice");
 		transportRating = (double) readIn.get("transportRating");
-		drugRate = (double) readIn.get("drugRate");
 		unemploymentRate = (double) readIn.get("unemploymentRate");
 		incapacityBenefit = (double) readIn.get("incapacityBenefit");
 		childInNoWorkHouse = (double) readIn.get("childInNoWorkHouse");
@@ -100,12 +97,11 @@ public class SocialFactors {
 		case 2: return this.GCSEScore;
 		case 3: return this.transportRating;
 		case 4: return this.schoolAbscences;
-		case 5: return this.drugRate;
+		case 5: return this.incomeSupport;
 		case 6: return this.unemploymentRate;
 		case 7: return this.childInNoWorkHouse;
 		case 8: return this.deliberateFires;
 		case 9: return this.incapacityBenefit;
-		case 10: return this.incomeSupport;
 		default: return -1;
 		}
 	}
@@ -117,12 +113,11 @@ public class SocialFactors {
 		case 2: return "GCSEScore";
 		case 3: return "transportRating";
 		case 4: return "schoolAbscences";
-		case 5: return "drugRate";
+		case 5: return "incomeSupport";
 		case 6: return "unemploymentRate";
 		case 7: return "childInNoWorkHouse";
 		case 8: return "deliberateFires";
 		case 9: return "incapacityBenefit";
-		case 10: return "incomeSupport";
 		default: return "";
 		}
 	}
@@ -147,13 +142,6 @@ public class SocialFactors {
 		}
 		else if (factors.getTransportRating() != -1) {
 			transportRating = (transportRating + factors.getTransportRating())/2;
-		}
-		
-		if (drugRate== -1) {
-			drugRate = factors.getDrugRate();
-		}
-		else if (factors.getDrugRate() != -1) {
-			drugRate= (drugRate + factors.getDrugRate())/2;
 		}
 		
 		if (unemploymentRate == -1) {
@@ -222,7 +210,13 @@ public class SocialFactors {
 		factors.append("housePrice", housePrice);
 		factors.append("crimeRate", crimeRate);
 		factors.append("unemploymentRate", unemploymentRate);
-		factors.append("drugRate", drugRate);
+		factors.append("deliberateFires", deliberateFires);
+		factors.append("incomeSupport", incomeSupport);
+		factors.append("incapacityBenefit", incapacityBenefit);
+		factors.append("GCSEScore", GCSEScore);
+		factors.append("childInNoWorkHouse", childInNoWorkHouse);
+		factors.append("schoolAbscences", schoolAbscences);
+		
 		return factors;
 	}
 
@@ -232,14 +226,6 @@ public class SocialFactors {
 
 	public void setUnemploymentRate(double unemploymentRate) {
 		this.unemploymentRate = unemploymentRate;
-	}
-
-	public double getDrugRate() {
-		return drugRate;
-	}
-
-	public void setDrugRate(double drugRate) {
-		this.drugRate = drugRate;
 	}
 
 	public void setIncapacityBenefit(double incapacityBenefit) {

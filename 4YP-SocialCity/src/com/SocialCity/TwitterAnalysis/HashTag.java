@@ -87,12 +87,22 @@ public class HashTag {
 		mongoClient.close();
 	} 
 	
-	public static String getTagList() throws UnknownHostException {
+	public static String getTagList(String time) throws UnknownHostException {
 		MongoClient mongoClient;
 		mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
-		DBCollection coll = db.getCollection(CollectionReader.returnName("tagsList"));
+		DBCollection coll;
 		
+		System.out.println(time);
+		if (time == null) {
+			System.out.println("yeeeah");
+			coll = db.getCollection(CollectionReader.returnName("tagList"));
+		}
+		else {
+			coll = db.getCollection("tagList_" + time);
+		}
+		
+		System.out.println("say what!?");
 		ArrayList<String> names = (ArrayList<String>) ((BasicDBObject) coll.findOne()).get("tags");
 		
 		Gson gson = new Gson();
@@ -112,7 +122,7 @@ public class HashTag {
 		DBCursor dbC = coll.find();
 		DBCursor results;
 		DB areas = mongoClient.getDB("areas");
-		DBCollection boroughs = areas.getCollection(CollectionReader.returnName("boroughsCollection"));
+		DBCollection boroughs = areas.getCollection("boroughs2012");
 		HashMap<String, Integer> placeRatio;
 		String placeName;
 		CodeNameMap cnm = new CodeNameMap();
@@ -148,12 +158,14 @@ public class HashTag {
 			//System.out.println(placeRatio);
 			double crimeRate = 0;
 			double housePrice = 0;
-			double educationRating = 0;
+			double GCSEScore = 0;
 			double transportRating = 0;
-			double meanAge = 0;
-			double drugRate = 0;
-			double employmentRate = 0;
-			double voteTurnout = 0;
+			double unemploymentRate = 0;
+			double income = 0;
+			double incapacity = 0;
+			double abscences = 0;
+			double childInNoWork = 0;
+			double fires = 0;
 			
 			relevant = false;
 			for (String k : placeRatio.keySet()) {
@@ -165,12 +177,14 @@ public class HashTag {
 					relevant = true;
 					crimeRate = crimeRate + (boroughFactors.getCrimeRate()*count);
 					housePrice = housePrice + (boroughFactors.getHousePrice()*count);
-					educationRating = educationRating + (boroughFactors.getEducationRating()*count);
+					GCSEScore = GCSEScore + (boroughFactors.getGCSEScore()*count);
 					transportRating = transportRating + (boroughFactors.getTransportRating()*count);
-					meanAge = meanAge + (boroughFactors.getMeanAge()*count);
-					drugRate = drugRate + (boroughFactors.getDrugRate()*count);
-					employmentRate = employmentRate + (boroughFactors.getEmploymentRate()*count);
-					voteTurnout = voteTurnout + (boroughFactors.getVoteTurnout()*count);
+					unemploymentRate = unemploymentRate + (boroughFactors.getUnemploymentRate()*count);
+					income = income + (boroughFactors.getIncomeSupport()*count);
+					incapacity = incapacity + (boroughFactors.getIncapacityBenefit()*count);
+					abscences = abscences + (boroughFactors.getSchoolAbscences()*count);
+					childInNoWork = childInNoWork + (boroughFactors.getChildInNoWorkHouse()*count);
+					fires = fires + (boroughFactors.getDeliberateFires()*count);
 					
 					total=total+count;
 					//System.out.println(k);
@@ -182,13 +196,16 @@ public class HashTag {
 			
 			if (relevant) {
 				tagFactors.setCrimeRate(crimeRate/total);
-				tagFactors.setDrugRate(drugRate/total);
-				tagFactors.setEducationRating(educationRating/total);
-				tagFactors.setEmploymentRate(employmentRate/total);
-				tagFactors.setHousePrice(housePrice/total);
-				tagFactors.setMeanAge(meanAge/total);
+				tagFactors.setGCSEScore(GCSEScore/total);
 				tagFactors.setTransportRating(transportRating/total);
-				tagFactors.setVoteTurnout(voteTurnout/total);
+				tagFactors.setUnemploymentRate(unemploymentRate/total);
+				tagFactors.setHousePrice(housePrice/total);
+				tagFactors.setIncomeSupport(income/total);
+				tagFactors.setIncapacityBenefit(incapacity/total);
+				tagFactors.setSchoolAbscences(abscences/total);
+				tagFactors.setChildInNoWorkHouse(childInNoWork/total);
+				tagFactors.setDeliberateFires(fires/total);
+				
 				System.out.println(tagFactors.getDBObject());
 				hashTagInfo.insert(tagFactors.getDBObject());
 				tagCount++;

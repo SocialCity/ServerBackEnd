@@ -149,7 +149,7 @@ public class TweetByArea {
 		DBCollection deviceStore = db2.getCollection(devFacName);
 		
 		DB areas = mongoClient.getDB("areas");
-		DBCollection boroughs = areas.getCollection(CollectionReader.returnName("boroughsCollection"));
+		DBCollection boroughs = areas.getCollection("boroughs2012");
 		
 		HashMap<String, String> nameMap = codeNameMap.getNameMap();
 		DBCursor results;
@@ -198,12 +198,14 @@ public class TweetByArea {
 			
 			double crimeRate = 0;
 			double housePrice = 0;
-			double educationRating = 0;
+			double GCSEScore = 0;
 			double transportRating = 0;
-			double meanAge = 0;
-			double drugRate = 0;
-			double employmentRate = 0;
-			double voteTurnout = 0;
+			double unemploymentRate = 0;
+			double income = 0;
+			double incapacity = 0;
+			double abscences = 0;
+			double childInNoWork = 0;
+			double fires = 0;
 			
 			relevant = false;
 			for (String k : placeRatio.keySet()) {
@@ -214,12 +216,14 @@ public class TweetByArea {
 					relevant = true;
 					crimeRate = crimeRate + (boroughFactors.getCrimeRate()*count);
 					housePrice = housePrice + (boroughFactors.getHousePrice()*count);
-					educationRating = educationRating + (boroughFactors.getEducationRating()*count);
+					GCSEScore = GCSEScore + (boroughFactors.getGCSEScore()*count);
 					transportRating = transportRating + (boroughFactors.getTransportRating()*count);
-					meanAge = meanAge + (boroughFactors.getMeanAge()*count);
-					drugRate = drugRate + (boroughFactors.getDrugRate()*count);
-					employmentRate = employmentRate + (boroughFactors.getEmploymentRate()*count);
-					voteTurnout = voteTurnout + (boroughFactors.getVoteTurnout()*count);
+					unemploymentRate = unemploymentRate + (boroughFactors.getUnemploymentRate()*count);
+					income = income + (boroughFactors.getIncomeSupport()*count);
+					incapacity = incapacity + (boroughFactors.getIncapacityBenefit()*count);
+					abscences = abscences + (boroughFactors.getSchoolAbscences()*count);
+					childInNoWork = childInNoWork + (boroughFactors.getChildInNoWorkHouse()*count);
+					fires = fires + (boroughFactors.getDeliberateFires()*count);
 					
 					total=total+count;
 					System.out.println(k);
@@ -231,13 +235,15 @@ public class TweetByArea {
 			
 			if (relevant) {
 				deviceFactors.setCrimeRate(crimeRate/total);
-				deviceFactors.setDrugRate(drugRate/total);
-				deviceFactors.setEducationRating(educationRating/total);
-				deviceFactors.setEmploymentRate(employmentRate/total);
-				deviceFactors.setHousePrice(housePrice/total);
-				deviceFactors.setMeanAge(meanAge/total);
+				deviceFactors.setGCSEScore(GCSEScore/total);
 				deviceFactors.setTransportRating(transportRating/total);
-				deviceFactors.setVoteTurnout(voteTurnout/total);
+				deviceFactors.setUnemploymentRate(unemploymentRate/total);
+				deviceFactors.setHousePrice(housePrice/total);
+				deviceFactors.setIncomeSupport(income/total);
+				deviceFactors.setIncapacityBenefit(incapacity/total);
+				deviceFactors.setSchoolAbscences(abscences/total);
+				deviceFactors.setChildInNoWorkHouse(childInNoWork/total);
+				deviceFactors.setDeliberateFires(fires/total);
 				System.out.println(deviceFactors.getDBObject());
 				
 				query = new BasicDBObject("locations", new BasicDBObject("ward0", newName));

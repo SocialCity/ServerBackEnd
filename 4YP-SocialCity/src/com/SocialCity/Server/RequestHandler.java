@@ -14,6 +14,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import com.SocialCity.DataParsers.ExcelParsing;
+import com.SocialCity.DatabaseSwitching.Updaters;
 import com.SocialCity.TwitterAnalysis.HashTag;
 import com.SocialCity.TwitterAnalysis.TweetByArea;
 import com.mongodb.BasicDBObject;
@@ -34,6 +35,7 @@ import com.mongodb.MongoClient;
 	//-http://localhost:8080/deviceList
 	//-http://localhost:8080/deviceFactor/device1
 	//-http://localhost:8080/factorList
+	//-http://localhost:8080/timestamps
 public class RequestHandler extends AbstractHandler {
 	
 	private static ResponseMaker rM;
@@ -48,6 +50,8 @@ public class RequestHandler extends AbstractHandler {
 		boolean useWards;
 		boolean combine;
 		boolean all;
+		String year = null;
+		String time = null;
 		
 		try{
 			switch (paths[1]) {
@@ -56,8 +60,11 @@ public class RequestHandler extends AbstractHandler {
 					useWards = Boolean.parseBoolean(paths[3]);
 					combine = Boolean.parseBoolean(paths[4]);
 					all = Boolean.parseBoolean(paths[5]);
+					if (paths.length > 6) {
+						year = paths[6];
+					}
 					if (factor < 0 || factor > 8) {throw new Exception();}
-					reply = rM.oneFactor(factor, useWards, combine, all);
+					reply = rM.oneFactor(factor, useWards, combine, all, year);
 					response.getWriter().println(reply);
 					break;
 				case "twoFactors":
@@ -66,32 +73,55 @@ public class RequestHandler extends AbstractHandler {
 					useWards = Boolean.parseBoolean(paths[4]);
 					combine = Boolean.parseBoolean(paths[5]);
 					all = Boolean.parseBoolean(paths[6]);
+					if (paths.length > 7) {
+						year = paths[7];
+					}
 					if (factor1 < 0 || factor1 > 8 || factor2 < 0 || factor2 > 8) {throw new Exception();}
-					reply = rM.twoFactors(factor1, factor2, useWards, combine, all);
+					reply = rM.twoFactors(factor1, factor2, useWards, combine, all, year);
 					response.getWriter().println(reply);
 					break;
 				case "hashTagFactors":
-					reply = rM.hashTags(paths[2], paths[3]);
+					if (paths.length > 4) {
+						time = paths[4];
+					}
+					reply = rM.hashTags(paths[2], paths[3], time);
 					response.getWriter().println(reply);
 					break;
 				case "hashTagList":
-					reply = rM.hashTagList();
+					if (paths.length > 2) {
+						time = paths[2];
+					}
+					System.out.println("wat");
+					reply = rM.hashTagList(time);
 					response.getWriter().println(reply);
 					break;
 				case "devicesForBorough":
-					reply = rM.devicesForBorough(paths[2]);
+					if (paths.length > 3) {
+						time = paths[3];
+					}
+					reply = rM.devicesForBorough(paths[2],time);
 					response.getWriter().println(reply);
 					break;
 				case "deviceList":
-					reply = rM.getDevice();
+					if (paths.length > 2) {
+						time = paths[2];
+					}
+					reply = rM.getDevice(time);
 					response.getWriter().println(reply);
 					break;
 				case "deviceFactor":
-					reply = rM.getDeviceFactors(paths[2]);
+					if (paths.length > 3) {
+						time = paths[3];
+					}
+					reply = rM.getDeviceFactors(paths[2], time);
 					response.getWriter().println(reply);
 					break;
 				case "factorList":
 					reply = rM.getFactorList();
+					response.getWriter().println(reply);
+					break;
+				case "timestamps":
+					reply = rM.getTimes();
 					response.getWriter().println(reply);
 					break;
 				default: throw new Exception();
@@ -107,13 +137,14 @@ public class RequestHandler extends AbstractHandler {
 	{
 		rM = new ResponseMaker();
 		//rM.getDeviceFactors("foursquare");
-		Server server = new Server(8080);
-		server.setHandler(new RequestHandler());
+		//Server server = new Server(8080);
+		//server.setHandler(new RequestHandler());
 		
-		server.start();
-		server.join();
+		//server.start();
+		//server.join();
 		
-		//new ExcelParsing().parse();
+		new ExcelParsing().parse();
+		Updaters.update("tweets");
 		//System.out.println(HashTag.getTagList());
 		//System.out.println(new TweetByArea().reTweets());
 		//new TweetByArea().deviceBreakdown();

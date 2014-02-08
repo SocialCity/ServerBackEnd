@@ -22,8 +22,8 @@ public class ResponseMaker {
 
 	private double factorConstant = 0.25;
 	
-	public String oneFactor(int factorNumber, boolean useWards, boolean combine, boolean all) {
-		ArrayList<SocialFactors> listOfData = createFactors(factorNumber, useWards, combine);
+	public String oneFactor(int factorNumber, boolean useWards, boolean combine, boolean all, String year) {
+		ArrayList<SocialFactors> listOfData = createFactors(factorNumber, useWards, combine, year);
 		Gson gson = new Gson();
 		
 		if (all) {
@@ -35,8 +35,8 @@ public class ResponseMaker {
 		
 	}
 	
-	public String twoFactors(int factorNumber1, int factorNumber2, boolean useWards, boolean combine, boolean all) {
-		ArrayList<SocialFactors> listOfData = createFactors(factorNumber1, useWards, combine);
+	public String twoFactors(int factorNumber1, int factorNumber2, boolean useWards, boolean combine, boolean all, String year) {
+		ArrayList<SocialFactors> listOfData = createFactors(factorNumber1, useWards, combine, year);
 		Gson gson = new Gson();
 		
 		if (all) {
@@ -47,7 +47,7 @@ public class ResponseMaker {
 		}
 	}
 	
-	public ArrayList<SocialFactors> createFactors(int factorNumber, boolean useWards, boolean combine) {
+	public ArrayList<SocialFactors> createFactors(int factorNumber, boolean useWards, boolean combine, String year) {
 		
 		MongoClient mongoClient;
 		HashMap<String, ArrayList<String>> nameMap = BoundaryMap.returnWardMap(useWards);//gets either the ward or borough location data
@@ -63,6 +63,10 @@ public class ResponseMaker {
 		HashSet<String> tempChecked = new HashSet<String>();
 		boolean recheck = true;
 		
+		if (!year.equals("2008")&&!year.equals("2009")&&!year.equals("2010")&&!year.equals("2011")&&!year.equals("2012")) {
+			year = "2012";
+		}
+		
 		try {
 			//gets the database
 			mongoClient = new MongoClient("localhost");
@@ -70,10 +74,10 @@ public class ResponseMaker {
 			DB db = mongoClient.getDB( "areas" );
 			
 			if (useWards){//get ward info
-				coll = db.getCollection(CollectionReader.returnName("wardsCollection"));
+				coll = db.getCollection("wards" + year);
 			}
 			else {//get borough info
-				coll = db.getCollection(CollectionReader.returnName("boroughsCollection"));
+				coll = db.getCollection("boroughs" + year);
 				System.out.println(coll.getCount());
 			}
 			
@@ -178,10 +182,10 @@ public class ResponseMaker {
 					combined = true;
 				}
 				break;
-		case 2: if ((sF.getEducationRating()*(1-factorConstant) < friend.getEducationRating()) && (sF.getEducationRating() > friend.getEducationRating()) || 
-						(sF.getEducationRating() * (1+factorConstant) > friend.getEducationRating()) && (sF.getEducationRating() < friend.getEducationRating())  || 
-						(friend.getEducationRating()*(1-factorConstant) < sF.getEducationRating()) && (sF.getEducationRating() < friend.getEducationRating()) || 
-						(friend.getEducationRating() * (1+factorConstant) > sF.getEducationRating()) && (sF.getEducationRating() > friend.getEducationRating())){
+		case 2: if ((sF.getGCSEScore()*(1-factorConstant) < friend.getGCSEScore()) && (sF.getGCSEScore() > friend.getGCSEScore()) || 
+						(sF.getGCSEScore() * (1+factorConstant) > friend.getGCSEScore()) && (sF.getGCSEScore() < friend.getGCSEScore())  || 
+						(friend.getGCSEScore()*(1-factorConstant) < sF.getGCSEScore()) && (sF.getGCSEScore() < friend.getGCSEScore()) || 
+						(friend.getGCSEScore() * (1+factorConstant) > sF.getGCSEScore()) && (sF.getGCSEScore() > friend.getGCSEScore())){
 					sF.combineLocations(friend);
 					combined = true;
 				}
@@ -194,49 +198,69 @@ public class ResponseMaker {
 					combined = true;
 				}
 				break;
-		case 4: if ((sF.getMeanAge()*(1-factorConstant) < friend.getMeanAge()) && (sF.getMeanAge() > friend.getMeanAge()) || 
-						(sF.getMeanAge() * (1+factorConstant) > friend.getMeanAge()) && (sF.getMeanAge() < friend.getMeanAge())  || 
-						(friend.getMeanAge()*(1-factorConstant) < sF.getMeanAge()) && (sF.getMeanAge() < friend.getMeanAge()) || 
-						(friend.getMeanAge() * (1+factorConstant) > sF.getMeanAge()) && (sF.getMeanAge() > friend.getMeanAge())){
+		case 4: if ((sF.getSchoolAbscences()*(1-factorConstant) < friend.getSchoolAbscences()) && (sF.getSchoolAbscences() > friend.getSchoolAbscences()) || 
+						(sF.getSchoolAbscences() * (1+factorConstant) > friend.getSchoolAbscences()) && (sF.getSchoolAbscences() < friend.getSchoolAbscences())  || 
+						(friend.getSchoolAbscences()*(1-factorConstant) < sF.getSchoolAbscences()) && (sF.getSchoolAbscences() < friend.getSchoolAbscences()) || 
+						(friend.getSchoolAbscences() * (1+factorConstant) > sF.getSchoolAbscences()) && (sF.getSchoolAbscences() > friend.getSchoolAbscences())){
 					sF.combineLocations(friend);
 					combined = true;
 				}
 				break;
-		case 5: if ((sF.getDrugRate()*(1-factorConstant) < friend.getDrugRate()) && (sF.getDrugRate() > friend.getDrugRate()) || 
-						(sF.getDrugRate() * (1+factorConstant) > friend.getDrugRate()) && (sF.getDrugRate() < friend.getDrugRate())  || 
-						(friend.getDrugRate()*(1-factorConstant) < sF.getDrugRate()) && (sF.getDrugRate() < friend.getDrugRate()) || 
-						(friend.getDrugRate() * (1+factorConstant) > sF.getDrugRate()) && (sF.getDrugRate() > friend.getDrugRate())){
+		case 5: if ((sF.getIncomeSupport()*(1-factorConstant) < friend.getIncomeSupport()) && (sF.getIncomeSupport() > friend.getIncomeSupport()) || 
+				(sF.getIncomeSupport() * (1+factorConstant) > friend.getIncomeSupport()) && (sF.getIncomeSupport() < friend.getIncomeSupport())  || 
+				(friend.getIncomeSupport()*(1-factorConstant) < sF.getIncomeSupport()) && (sF.getIncomeSupport() < friend.getIncomeSupport()) || 
+				(friend.getIncomeSupport() * (1+factorConstant) > sF.getIncomeSupport()) && (sF.getIncomeSupport() > friend.getIncomeSupport())){
 					sF.combineLocations(friend);
 					combined = true;
 				}
 				break;
-		case 6: if ((sF.getEmploymentRate()*(1-factorConstant) < friend.getEmploymentRate()) && (sF.getEmploymentRate() > friend.getEmploymentRate()) || 
-						(sF.getEmploymentRate() * (1+factorConstant) > friend.getEmploymentRate()) && (sF.getEmploymentRate() < friend.getEmploymentRate())  || 
-						(friend.getEmploymentRate()*(1-factorConstant) < sF.getEmploymentRate()) && (sF.getEmploymentRate() < friend.getEmploymentRate()) || 
-						(friend.getEmploymentRate() * (1+factorConstant) > sF.getEmploymentRate()) && (sF.getEmploymentRate() > friend.getEmploymentRate())){
+		case 6: if ((sF.getUnemploymentRate()*(1-factorConstant) < friend.getUnemploymentRate()) && (sF.getUnemploymentRate() > friend.getUnemploymentRate()) || 
+						(sF.getUnemploymentRate() * (1+factorConstant) > friend.getUnemploymentRate()) && (sF.getUnemploymentRate() < friend.getUnemploymentRate())  || 
+						(friend.getUnemploymentRate()*(1-factorConstant) < sF.getUnemploymentRate()) && (sF.getUnemploymentRate() < friend.getUnemploymentRate()) || 
+						(friend.getUnemploymentRate() * (1+factorConstant) > sF.getUnemploymentRate()) && (sF.getUnemploymentRate() > friend.getUnemploymentRate())){
 					sF.combineLocations(friend);
 					combined = true;
 				}
 				break;
-		case 7: if ((sF.getVoteTurnout()*(1-factorConstant) < friend.getVoteTurnout()) && (sF.getVoteTurnout() > friend.getVoteTurnout()) || 
-						(sF.getVoteTurnout() * (1+factorConstant) > friend.getVoteTurnout()) && (sF.getVoteTurnout() < friend.getVoteTurnout())  || 
-						(friend.getVoteTurnout()*(1-factorConstant) < sF.getVoteTurnout()) && (sF.getVoteTurnout() < friend.getVoteTurnout()) || 
-						(friend.getVoteTurnout() * (1+factorConstant) > sF.getVoteTurnout()) && (sF.getVoteTurnout() > friend.getVoteTurnout())){
+		case 7: if ((sF.getChildInNoWorkHouse()*(1-factorConstant) < friend.getChildInNoWorkHouse()) && (sF.getChildInNoWorkHouse() > friend.getChildInNoWorkHouse()) || 
+						(sF.getChildInNoWorkHouse() * (1+factorConstant) > friend.getChildInNoWorkHouse()) && (sF.getChildInNoWorkHouse() < friend.getChildInNoWorkHouse())  || 
+						(friend.getChildInNoWorkHouse()*(1-factorConstant) < sF.getChildInNoWorkHouse()) && (sF.getChildInNoWorkHouse() < friend.getChildInNoWorkHouse()) || 
+						(friend.getChildInNoWorkHouse() * (1+factorConstant) > sF.getChildInNoWorkHouse()) && (sF.getChildInNoWorkHouse() > friend.getChildInNoWorkHouse())){
 					sF.combineLocations(friend);
 					combined = true;
 				}
 				break;
-		case 8: break;
-		
+		case 8: if ((sF.getDeliberateFires()*(1-factorConstant) < friend.getDeliberateFires()) && (sF.getDeliberateFires() > friend.getDeliberateFires()) || 
+				(sF.getDeliberateFires() * (1+factorConstant) > friend.getDeliberateFires()) && (sF.getDeliberateFires() < friend.getDeliberateFires())  || 
+				(friend.getDeliberateFires()*(1-factorConstant) < sF.getDeliberateFires()) && (sF.getDeliberateFires() < friend.getDeliberateFires()) || 
+				(friend.getDeliberateFires() * (1+factorConstant) > sF.getDeliberateFires()) && (sF.getDeliberateFires() > friend.getDeliberateFires())){
+					sF.combineLocations(friend);
+					combined = true;
+				}
+				break;
+		case 9: if ((sF.getIncapacityBenefit()*(1-factorConstant) < friend.getIncapacityBenefit()) && (sF.getIncapacityBenefit() > friend.getIncapacityBenefit()) || 
+				(sF.getIncapacityBenefit() * (1+factorConstant) > friend.getIncapacityBenefit()) && (sF.getIncapacityBenefit() < friend.getIncapacityBenefit())  || 
+				(friend.getIncapacityBenefit()*(1-factorConstant) < sF.getIncapacityBenefit()) && (sF.getIncapacityBenefit() < friend.getIncapacityBenefit()) || 
+				(friend.getIncapacityBenefit() * (1+factorConstant) > sF.getIncapacityBenefit()) && (sF.getIncapacityBenefit() > friend.getIncapacityBenefit())){
+					sF.combineLocations(friend);
+					combined = true;
+				}
+				break;
 		}
 		return combined;
 	}
 
-	public String hashTags(String tag1, String tag2) throws UnknownHostException {
+	public String hashTags(String tag1, String tag2, String time) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
-		DBCollection hashTagInfo = db.getCollection(CollectionReader.returnName("tagInfo"));
+		DBCollection hashTagInfo;
 		
+		if (time == null) {
+			hashTagInfo = db.getCollection(CollectionReader.returnName("tagInfo"));
+		}
+		else {
+			hashTagInfo = db.getCollection("tagInfo_" + time);
+		}
 		
 		BasicDBObject query = new BasicDBObject("locations", new BasicDBObject("ward0", tag1));
 		SocialFactors tag1Factors = new SocialFactors(hashTagInfo.findOne(query));
@@ -252,15 +276,22 @@ public class ResponseMaker {
 		return gson.toJson(listOfData);
 	}
 
-	public String hashTagList() throws UnknownHostException {
-			return HashTag.getTagList();
+	public String hashTagList(String time) throws UnknownHostException {
+			return HashTag.getTagList(time);
 	}
 
-	public String devicesForBorough(String code) throws UnknownHostException {
+	public String devicesForBorough(String code, String time) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "deviceBreakdown" );
 		DBCollection coll;
-		coll = db.getCollection(CollectionReader.returnName("devicesForBoroughs"));
+		
+		if (time == null) {
+			coll = db.getCollection(CollectionReader.returnName("devicesForBoroughs"));
+		}
+		else {
+			coll = db.getCollection("devicesForBoroughs_" + time);
+		}
+		
 		Gson gson = new Gson();
 		
 		BasicDBObject query = new BasicDBObject("borough", code);
@@ -268,18 +299,33 @@ public class ResponseMaker {
 		return gson.toJson(coll.find(query).next().toString());
 	}
 
-	public String getDevice() throws UnknownHostException {
+	public String getDevice(String time) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "deviceBreakdown" );
-		DBCollection coll = db.getCollection(CollectionReader.returnName("deviceList"));
+		DBCollection coll;
+		
+		if (time == null) {
+			coll = db.getCollection(CollectionReader.returnName("deviceList"));
+		}
+		else {
+			coll = db.getCollection("deviceList_" + time);
+		}
+		
 		Gson gson = new Gson();
 		return gson.toJson(coll.findOne().get("list"));
 	}
 
-	public String getDeviceFactors(String deviceName) throws UnknownHostException {
+	public String getDeviceFactors(String deviceName, String time) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "deviceBreakdown" );
-		DBCollection coll = db.getCollection(CollectionReader.returnName("deviceFactors"));
+		DBCollection coll ;
+		
+		if (time == null) {
+			coll = db.getCollection(CollectionReader.returnName("deviceFactors"));
+		}
+		else {
+			coll = db.getCollection("deviceFactors_"+time);
+		}
 		
 		BasicDBObject query = new BasicDBObject("locations", new BasicDBObject("ward0", deviceName));
 		
@@ -306,8 +352,8 @@ public class ResponseMaker {
 		
 		entry = new HashMap<String, String>();
 		entry.put("id", "2");
-		entry.put("factor", "Education Rating");
-		entry.put("measure", "Percentage of people with at least level 4 qualifications");
+		entry.put("factor", "GCSE Score");
+		entry.put("measure", "Average number of GCSE points");
 		list.add(entry);
 		
 		entry = new HashMap<String, String>();
@@ -318,33 +364,59 @@ public class ResponseMaker {
 		
 		entry = new HashMap<String, String>();
 		entry.put("id", "4");
-		entry.put("factor", "Mean Age");
-		entry.put("measure", "Years");
+		entry.put("factor", "School Abscences");
+		entry.put("measure", "Percentage of unauthorised school abscences for all schools");
 		list.add(entry);
 		
 		entry = new HashMap<String, String>();
 		entry.put("id", "5");
-		entry.put("factor", "Drug Rate");
-		entry.put("measure", "Estimated number of problem drug users (crack and or opiates) per 1000 of the population");
+		entry.put("factor", "Income Support");
+		entry.put("measure", "Income support rate index");
 		list.add(entry);
 		
 		entry = new HashMap<String, String>();
 		entry.put("id", "6");
-		entry.put("factor", "Employment Rate");
-		entry.put("measure", "Percentage of population in employment");
+		entry.put("factor", "Unemployment Rate");
+		entry.put("measure", "Percentage of population unemployed");
 		list.add(entry);
 		
 		entry = new HashMap<String, String>();
 		entry.put("id", "7");
-		entry.put("factor", "Vote Turnout");
-		entry.put("measure", "Percentage of voter turnout at mayoral elections");
+		entry.put("factor", "Dependent children in out-of-work families");
+		entry.put("measure", "Number of children living in a house with no one employed");
 		list.add(entry);
 		
 		entry = new HashMap<String, String>();
 		entry.put("id", "8");
-		entry.put("factor", "Tweet Proportion");
-		entry.put("measure", "Ratio of tweets from borough compared to the whole of London");
+		entry.put("factor", "Deliberate Fires");
+		entry.put("measure", "Number of deliberate fires per 1000 people");
 		list.add(entry);
+		
+		entry = new HashMap<String, String>();
+		entry.put("id", "9");
+		entry.put("factor", "Incapacity Benefit");
+		entry.put("measure", "Incapacity claimant rate index");
+		list.add(entry);
+		
+		Gson gson = new Gson();
+		return gson.toJson(list);
+	}
+
+	public String getTimes() throws UnknownHostException {
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "updates" );
+		DBCollection coll = db.getCollection("times");
+		
+		DBCursor dbc = coll.find();
+		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
+		HashMap<String, String> entry = new HashMap<String, String>();
+		String time;
+		while(dbc.hasNext()) {
+			entry = new HashMap<String, String>();
+			time = (String) dbc.next().get("date");
+			entry.put("date",time);
+			list.add(entry);
+		}
 		
 		Gson gson = new Gson();
 		return gson.toJson(list);

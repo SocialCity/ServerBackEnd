@@ -1,10 +1,14 @@
 package com.SocialCity.TwitterAnalysis.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import com.SocialCity.TwitterAnalysis.DAL_Classification;
 import com.SocialCity.TwitterAnalysis.TweetScore;
+import com.SocialCity.TwitterAnalysis.Tweet_Info_Bloc;
+import com.SocialCity.TwitterAnalysis.Tweet_Obj;
 import com.SocialCity.TwitterAnalysis.TwitterAnalyser;
 import com.SocialCity.TwitterAnalysis.Twokenizer;
 import com.mongodb.BasicDBObject;
@@ -16,65 +20,40 @@ import com.mongodb.MongoClient;
 
 public class Test_Analyser {
 
+	static final String mongoHost = "localhost";
+	static final String mongo_DB = "tweetInfo";
+	static final String mongoCollection = "tweets";
+	
 	public static void main(String[] args) {
+		
+		//bloc for results
+		Tweet_Info_Bloc result_bloc;
+		
+		//get and prepare tweets
 		ArrayList<String> tweets = getTweets();
-		ArrayList<TweetScore> scores = new ArrayList<TweetScore>(); 
-		
-		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt");
-			
-		
-		
-		String text = null;
+		ArrayList<Tweet_Obj> tw_list = new ArrayList<Tweet_Obj>();
 		Iterator<String> i = tweets.iterator();
-		while (i.hasNext()){
-			//pass and analyse the tweet
-			scores.add(ta.analyse_tweet(i.next()));
+		while(i.hasNext()){
+			tw_list.add(new Tweet_Obj(i.next()));
 		}
 		
+		//build analyser
+		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt");
 		
-		double total_matched_ratio = 0;
-		double total_valience = 0;
-		double total_activity = 0;
-		double total_imagery = 0;
-		double count = 0;
+		//analyse tweets
+		result_bloc = ta.analyse_tweets(tw_list);
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().size());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(0).get_word());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(0).get_activity_mean());
 		
-		TweetScore tweet_sc = null;
-		Iterator<TweetScore> it_ts = scores.iterator();
-		while (it_ts.hasNext()){
-			tweet_sc = it_ts.next();
-			
-			//analytics setup
-			total_matched_ratio =+ tweet_sc.get_matched_ratio();
-			total_valience =+ tweet_sc.get_valience();
-			total_activity =+ tweet_sc.get_active();
-			total_imagery =+ tweet_sc.get_image();
-			count++;
-			
-			
-			
-		/*	System.out.println("****************");
-			System.out.println(tweet_sc.get_tweet());
-			System.out.println("valience: " + tweet_sc.get_valience());
-			System.out.println("activity: " + tweet_sc.get_active());
-			System.out.println("imagery: " + tweet_sc.get_image());
-			System.out.println("matched ratio: " + tweet_sc.get_matched_ratio());
-			System.out.println("****************"); */
-		}
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(4).get_word());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(4).get_Frequency());
 		
-		//analytics over the sentiment analyser
-		
-		double avg_matched_ratio = total_matched_ratio / count;
-		double avg_valience = total_valience /count;
-		double avg_activity = total_activity /count;
-		double avg_imagery = total_imagery /count;
-		
-		//print out analytic
-		
-		System.out.println("************ averages ***********");
-		System.out.println("average valience: " + avg_valience);
-		System.out.println("average activity: " + avg_activity);
-		System.out.println("average imagery: " + avg_imagery);
-		System.out.println("average matched ratio: " + avg_matched_ratio);
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(1).get_word());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(1).get_Frequency());
+
+		// ***** print out variables from result_bloc ******* //
+	
 	}
 
 	public static ArrayList getTweets(){
@@ -84,19 +63,19 @@ public class Test_Analyser {
 
 		try{
 			MongoClient mongoClient;
-			mongoClient = new MongoClient("localhost");
-			DB db = mongoClient.getDB( "tweetInfo" );
+			mongoClient = new MongoClient(mongoHost);
+			DB db = mongoClient.getDB(mongo_DB);
 			DBCollection coll = null;
-			coll = db.getCollection("tweets");		
+			coll = db.getCollection(mongoCollection);		
 			query = new BasicDBObject("place.name", name);
 			
 			System.out.println("fetching tweets");
 			
 			// use the query for a certain place
-			//DBCursor t = coll.find(query);
-			
+			DBCursor t = coll.find(query);
+			System.out.println(t.size());
 			//get all tweets
-			DBCursor t =coll.find();
+			//DBCursor t =coll.find();
 			for (DBObject dbo : t) {;
 				tweets.add((String) dbo.get("text"));
 			}

@@ -137,14 +137,14 @@ public class RequestHandler extends AbstractHandler {
 	{
 		rM = new ResponseMaker();
 		//rM.getDeviceFactors("foursquare");
-		//Server server = new Server(8080);
-		//server.setHandler(new RequestHandler());
+		Server server = new Server(8080);
+		server.setHandler(new RequestHandler());
 		
-		//server.start();
-		//server.join();
+		server.start();
+		server.join();
 		
-		new ExcelParsing().parse();
-		Updaters.update("tweets");
+		//new ExcelParsing().parse();
+		//Updaters.update("tweets");
 		//System.out.println(HashTag.getTagList());
 		//System.out.println(new TweetByArea().reTweets());
 		//new TweetByArea().deviceBreakdown();

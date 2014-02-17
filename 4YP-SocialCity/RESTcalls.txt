@@ -35,6 +35,14 @@ http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(true)OrBorough
 
 **returns all factors availble and the factorNumber to be used**
 
+http://localhost:8080/words/wordCodeNum/boroughCode
+
+**Returns the words associated with a particular borough code. wordCodeNum refers to the words that are returned, according to this key:
+	0 - all
+	1 - nouns
+	2 - adjectives
+	3 - verbs
+	4 - DAL words **
 
 FACTOR NUMBERS:
 

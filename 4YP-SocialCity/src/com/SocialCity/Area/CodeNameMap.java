@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CodeNameMap {
 	
@@ -34,6 +36,20 @@ public class CodeNameMap {
 	
 	public String getCode(String boroughName) {
 		return codeMap.get(boroughName);
+	}
+	
+	public Set<String> getBoroughCodes() {
+		Set<String> codes = codeNameMap.keySet();
+		Set<String> returnSet = new HashSet<String>();
+		
+		for (String s : codes) {
+			if (s.length() <= 4) {
+				//System.out.println(s);
+				returnSet.add(s);
+			}
+		}
+		
+		return returnSet;
 	}
 	
 	private HashMap<String, String> getBaseMap(boolean code) {

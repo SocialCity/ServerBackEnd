@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 import com.SocialCity.DataParsers.CollectionReader;
+import com.SocialCity.SocialFactor.AreaWordsMaker;
 import com.SocialCity.TwitterAnalysis.HashTag;
 import com.SocialCity.TwitterAnalysis.TweetByArea;
 import com.mongodb.BasicDBObject;
@@ -45,6 +46,7 @@ public class Updaters {
 		String devFacName = "deviceFactors_" + date.toString();
 		String devListName = "deviceList_" + date.toString();
 		String devForBoName = "devicesForBoroughs_" + date.toString();
+		String wordsName = "wordsInfo_" + date.toString();
 		
 		HashTag.topHashTags(tweetName,hashTagName,topTagsName,tagListName); 
 		HashTag.tagLocationInfo(tweetName, tagInfoName, topTagsName);
@@ -52,6 +54,7 @@ public class Updaters {
 		tba.deviceFactors(tweetName, devFacName);
 		tba.createDeviceList(tweetName, devListName);
 		tba.deviceBreakdown(tweetName, devForBoName);
+		AreaWordsMaker.createDatabase(tweetName, wordsName);
 		
 		try {
 			CollectionReader.editName("hashtag", hashTagName);
@@ -62,6 +65,7 @@ public class Updaters {
 			CollectionReader.editName("deviceFactors", devFacName);
 			CollectionReader.editName("deviceList", devListName);
 			CollectionReader.editName("devicesForBoroughs", devForBoName);
+			CollectionReader.editName("wordsInfo", wordsName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -76,7 +80,7 @@ public class Updaters {
 	}
 	public static void main(String[] args) throws Exception
 	{
-		update("tweets");
+		update(args[0]);
 	}
 
 }

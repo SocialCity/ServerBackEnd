@@ -15,8 +15,7 @@ public class SocialFactors {
 	private double transportRating;
 	private double unemploymentRate;
 	private double incapacityBenefit;
-
-	private Emotion sentiment;
+	
 	private double childInNoWorkHouse;
 	private double schoolAbscences;
 	private double GCSEScore;
@@ -72,7 +71,6 @@ public class SocialFactors {
 	public double getTransportRating(){return transportRating;}
 	
 	public ArrayList<String> getLocation(){return location;}
-	public Emotion getSentiment(){return sentiment;}
 	
 	public void setCrimeRate(double crimeRate){
 		this.crimeRate = crimeRate;
@@ -84,10 +82,6 @@ public class SocialFactors {
 	
 	public void setTransportRating(double transportRating) {
 		this.transportRating = transportRating;
-	}
-	
-	public void setSentiment (Emotion sentiment) {
-		this.sentiment = sentiment;
 	}
 	
 	public double getFactorValue(int factorNumber) {

@@ -15,6 +15,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import com.SocialCity.DataParsers.ExcelParsing;
 import com.SocialCity.DatabaseSwitching.Updaters;
+import com.SocialCity.SocialFactor.AreaWordsMaker;
 import com.SocialCity.TwitterAnalysis.HashTag;
 import com.SocialCity.TwitterAnalysis.TweetByArea;
 import com.mongodb.BasicDBObject;
@@ -36,6 +37,7 @@ import com.mongodb.MongoClient;
 	//-http://localhost:8080/deviceFactor/device1
 	//-http://localhost:8080/factorList
 	//-http://localhost:8080/timestamps
+	//http://localhost:8080/words/wordCodeNum/boroughCode
 public class RequestHandler extends AbstractHandler {
 	
 	private static ResponseMaker rM;
@@ -124,6 +126,13 @@ public class RequestHandler extends AbstractHandler {
 					reply = rM.getTimes();
 					response.getWriter().println(reply);
 					break;
+				case "words":
+					if (paths.length > 4) {
+						time = paths[4];
+					}
+					reply = rM.getWords(Integer.parseInt(paths[2]), paths[3], time);
+					response.getWriter().println(reply);
+					break;
 				default: throw new Exception();
 				
 			}
@@ -143,6 +152,7 @@ public class RequestHandler extends AbstractHandler {
 		server.start();
 		server.join();
 		
+		//AreaWordsMaker.createDatabase("tweets", "wordsInfo");
 		//new ExcelParsing().parse();
 		//Updaters.update("tweets");
 		//System.out.println(HashTag.getTagList());

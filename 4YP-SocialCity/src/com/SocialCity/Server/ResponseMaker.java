@@ -7,6 +7,7 @@ import java.util.HashSet;
 
 import com.SocialCity.Area.BoundaryMap;
 import com.SocialCity.DataParsers.CollectionReader;
+import com.SocialCity.SocialFactor.AreaWords;
 import com.SocialCity.SocialFactor.SocialFactors;
 import com.SocialCity.TwitterAnalysis.HashTag;
 import com.SocialCity.TwitterAnalysis.TweetByArea;
@@ -329,8 +330,6 @@ public class ResponseMaker {
 		
 		BasicDBObject query = new BasicDBObject("locations", new BasicDBObject("ward0", deviceName));
 		
-		DBCursor d = coll.find();
-		while (d.hasNext()) {System.out.println(d.next());}
 		Gson gson = new Gson();
 		return gson.toJson(coll.find(query).next().toString());
 	}
@@ -420,6 +419,56 @@ public class ResponseMaker {
 		
 		Gson gson = new Gson();
 		return gson.toJson(list);
+	}
+
+	public String getWords(int wordCode, String boroughCode, String time) throws UnknownHostException {
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "tweetInfo" );
+		DBCollection coll ;
+		Gson gson = new Gson();
+		
+		HashMap<String, Object> result = new HashMap<String, Object>();
+
+		if (time == null) {
+			coll = db.getCollection(new CollectionReader().returnName("wordsInfo"));
+		}
+		else {
+			coll = db.getCollection("words_"+time);
+		}
+		
+		BasicDBObject query = new BasicDBObject("code", boroughCode);
+		
+		DBCursor dbc = coll.find(query);
+		BasicDBObject dbo = (BasicDBObject) dbc.next();
+		System.out.println("About to make");
+		AreaWords aw = new AreaWords(dbo);
+		System.out.println("Made the aW");
+		
+		result.put("locations", aw.getCode());
+		
+		switch (wordCode) {
+		case 0:
+			result.put("nouns", aw.getNouns());
+			result.put("adjective", aw.getAdjective());
+			result.put("verb", aw.getVerb());
+			result.put("DAL", aw.getDAL());
+			break;
+		case 1:
+			result.put("nouns", aw.getNouns());
+			break;
+		case 2:
+			result.put("adjective", aw.getAdjective());
+			break;
+		case 3:
+			result.put("verb", aw.getVerb());
+			break;
+		case 4:
+			result.put("DAL", aw.getDAL());
+			break;
+		}
+		
+		
+		return gson.toJson(result);
 	}
 
 }

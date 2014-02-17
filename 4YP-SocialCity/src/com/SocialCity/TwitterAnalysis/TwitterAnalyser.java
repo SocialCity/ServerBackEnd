@@ -100,7 +100,7 @@ public class TwitterAnalyser {
 			br = new BufferedReader(new FileReader(file));
 			while ((line = br.readLine()) != null) {
 				if (!line.startsWith("#")){
-					System.out.println(line);
+				//	System.out.println(line);
 					line = squeezeWhitespace(line);
 					values = line.split(" ");
 					//create score object

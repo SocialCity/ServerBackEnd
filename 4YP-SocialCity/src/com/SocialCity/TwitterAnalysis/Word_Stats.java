@@ -14,9 +14,9 @@ public class Word_Stats implements Comparable<Word_Stats> {
 	private ArrayList<Double> DAL_image; // a list of the image scores that tweets have with the word in
 	private ArrayList<Double> DAL_valience;	// a list of the valience scores that tweets have with the word in
 	
-	private boolean stats_uptodate = true;
+	private boolean stats_uptodate = false;
 	
-	double stat_activity_varience;
+	double stat_activity_variance;
 	double stat_image_variance;
 	double stat_valience_variance;
 	
@@ -24,13 +24,23 @@ public class Word_Stats implements Comparable<Word_Stats> {
 	double stat_image_mean;
 	double stat_valience_mean;
 	
-	
+	double stat_activity_stddev;
+	double stat_image_stddev;
+	double stat_valience_stddev;
 
 	public Word_Stats(String word){
 		this.word = word;
 		this.DAL_activity = new ArrayList<Double>();
 		this.DAL_image = new ArrayList<Double>();
 		this.DAL_valience = new ArrayList<Double>();
+	}
+	
+	public void update_stats(){
+		get_imagery_stddev();
+		get_activity_stddev();
+		get_valience_stddev();
+		
+		stats_uptodate = true;
 	}
 	
 	public Double get_valience_mean(){
@@ -88,6 +98,95 @@ public class Word_Stats implements Comparable<Word_Stats> {
 		else{
 			return stat_image_mean;
 		}
+	}
+	
+	public Double get_valience_varience(){
+		double total = 0;
+		double mean = 0;
+		double v = 0;
+		
+		if (stats_uptodate == false){
+			mean = get_valience_mean();
+			Iterator<Double> it = DAL_valience.iterator();
+			while (it.hasNext()){
+				v = it.next().doubleValue();
+				total += (mean - v)*(mean - v);
+			}
+			stat_valience_variance =  total/DAL_valience.size();
+			return stat_valience_variance;
+		}
+		
+		else
+		{
+			return stat_valience_variance;
+		}
+	}
+	
+	public Double get_activity_varience(){
+		double total = 0;
+		double mean = 0;
+		double v = 0;
+		
+		if (stats_uptodate == false){
+			mean = get_activity_mean();
+			Iterator<Double> it = DAL_activity.iterator();
+			while (it.hasNext()){
+				v = it.next().doubleValue();
+				total += (mean - v)*(mean - v);
+			}
+			stat_activity_variance =  total/DAL_activity.size();
+			return stat_activity_variance;
+		}
+		
+		else
+		{
+			return stat_activity_variance;
+		}
+	}
+	
+	public Double get_imagery_varience(){
+		double total = 0;
+		double mean = 0;
+		double v = 0;
+		
+		if (stats_uptodate == false){
+			mean = get_imagery_mean();
+			Iterator<Double> it = DAL_image.iterator();
+			while (it.hasNext()){
+				v = it.next().doubleValue();
+				total += (mean - v)*(mean - v);
+			}
+			stat_image_variance =  total/DAL_image.size();
+			return stat_image_variance;
+		}
+		
+		else
+		{
+			return stat_image_variance;
+		}
+	}
+	
+	public Double get_valience_stddev(){
+		
+		if (stats_uptodate == false)
+			stat_valience_stddev = Math.sqrt(get_valience_varience());
+		
+		return stat_valience_stddev;
+	}
+	
+	public Double get_imagery_stddev(){
+		if (stats_uptodate == false)
+				stat_image_stddev =  Math.sqrt(get_imagery_varience());
+		
+		return stat_image_stddev;
+	}
+	
+	public Double get_activity_stddev(){
+		
+		if (stats_uptodate == false)
+				stat_activity_stddev =  Math.sqrt(get_activity_varience());
+		
+		return stat_activity_stddev;
 	}
 	
 	@Override

@@ -43,14 +43,26 @@ public class Test_Analyser {
 		//analyse tweets
 		result_bloc = ta.analyse_tweets(tw_list);
 		
+		result_bloc.get_adjective_stats_freqsorted().get(1).update_stats();
 		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(1).get_word());
 		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(1).get_Frequency());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(1).get_valience_varience());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(1).get_activity_varience());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(1).get_imagery_varience());
+	
+		result_bloc.get_noun_stats_freqsorted().get(7).update_stats();
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(7).get_word());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(7).get_Frequency());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(7).get_valience_varience());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(7).get_activity_varience());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(7).get_imagery_varience());
 		
-		System.out.println(result_bloc.get_noun_stats_freqsorted().get(4).get_word());
-		System.out.println(result_bloc.get_noun_stats_freqsorted().get(4).get_Frequency());
-		
+		result_bloc.get_noun_stats_freqsorted().get(1).update_stats();
 		System.out.println(result_bloc.get_verb_stats_freqsorted().get(1).get_word());
 		System.out.println(result_bloc.get_verb_stats_freqsorted().get(1).get_Frequency());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(1).get_valience_varience());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(1).get_activity_varience());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(1).get_imagery_varience());
 
 		// ***** print out variables from result_bloc ******* //
 	

@@ -13,14 +13,16 @@ public class TweetScore {
 	private Double active = null;
 	private Double image = null;
 	private Double matched_ratio = null;
+	private Double dal_ratio = null;
 	private ArrayList<String> matched_DAL_words = new ArrayList<String>();
 	private ArrayList<String> matched_nouns = new ArrayList<String>();
 	private ArrayList<String> matched_verbs = new ArrayList<String>();
 	private ArrayList<String> matched_adjectives = new ArrayList<String>();
 	private ArrayList<String> hashtags = new ArrayList<String>();
 	private ArrayList<String> AT_tags = new ArrayList<String>();
-
 	
+	private ArrayList<String> category_matches = new ArrayList<String>();
+
 	private T_Classification t_classification = null;
 	
 	private DAL_Classification dal_classification = null;
@@ -31,13 +33,14 @@ public class TweetScore {
 	
 	private Set nouns = null;
 
-	public TweetScore(String tweet, Double val, Double active, Double image, Double matched_ratio, DAL_Classification dal_classification, Boolean retweet){
+	public TweetScore(String tweet, Double val, Double active, Double image, Double matched_ratio, DAL_Classification dal_classification,Double dal_ratio,  Boolean retweet){
 		this.tweet = tweet;
 		this.val = val;
 		this.active = active;
 		this.image = image;
 		this.matched_ratio = matched_ratio;
 		this.dal_classification = dal_classification;
+		this.dal_ratio = dal_ratio;
 		retweet_flag = retweet;
 		
 	}
@@ -67,7 +70,7 @@ public class TweetScore {
 		this.hashtags.addAll(hashtags);
 	}
 	
-	public ArrayList get_hashtags(){
+	public ArrayList<String> get_hashtags(){
 		return hashtags;
 	}
 	
@@ -90,6 +93,10 @@ public class TweetScore {
 	
 	public Double get_matched_ratio(){
 		return matched_ratio;
+	}
+	
+	public Double get_DAL_ratio(){
+		return dal_ratio;
 	}
 
 	public DAL_Classification get_Dal_classification() {
@@ -126,6 +133,14 @@ public class TweetScore {
 
 	public void set_matched_DAL_words(ArrayList<String> matched_DAL_words) {
 		this.matched_DAL_words = matched_DAL_words;
+	}
+
+	public ArrayList<String> get_category_matches() {
+		return category_matches;
+	}
+
+	public void set_category_matches(ArrayList<String> category_matches) {
+		this.category_matches = category_matches;
 	}
 
 	

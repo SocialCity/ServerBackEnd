@@ -1,6 +1,7 @@
 package com.SocialCity.TwitterAnalysis;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 public class Word_Stats implements Comparable<Word_Stats> {
@@ -13,6 +14,8 @@ public class Word_Stats implements Comparable<Word_Stats> {
 	private ArrayList<Double> DAL_activity; // a list of the activity scores that tweets have with the word in
 	private ArrayList<Double> DAL_image; // a list of the image scores that tweets have with the word in
 	private ArrayList<Double> DAL_valience;	// a list of the valience scores that tweets have with the word in
+	private ArrayList<Double> DAL_Ratio;
+	private HashSet<String> Hashtags;
 	
 	private boolean stats_uptodate = false;
 	
@@ -24,6 +27,8 @@ public class Word_Stats implements Comparable<Word_Stats> {
 	double stat_image_mean;
 	double stat_valience_mean;
 	
+	double stat_DAL_ratio_mean;
+	
 	double stat_activity_stddev;
 	double stat_image_stddev;
 	double stat_valience_stddev;
@@ -33,14 +38,35 @@ public class Word_Stats implements Comparable<Word_Stats> {
 		this.DAL_activity = new ArrayList<Double>();
 		this.DAL_image = new ArrayList<Double>();
 		this.DAL_valience = new ArrayList<Double>();
+		this.DAL_Ratio = new ArrayList<Double>();
+		this.Hashtags = new HashSet<String>();
 	}
 	
 	public void update_stats(){
 		get_imagery_stddev();
 		get_activity_stddev();
 		get_valience_stddev();
-		
+		get_DAL_ratio_mean();
 		stats_uptodate = true;
+	}
+	
+	public Double get_DAL_ratio_mean(){
+		
+			double total = 0;
+			if (stats_uptodate == false)
+			{
+				Iterator<Double> it = DAL_Ratio.iterator();
+			
+				while (it.hasNext()){
+					total = total + it.next().doubleValue();
+				}
+				total = total / DAL_Ratio.size();
+			
+				stat_DAL_ratio_mean = total;
+				return stat_DAL_ratio_mean;
+			}
+			else
+				return stat_DAL_ratio_mean;
 	}
 	
 	public Double get_valience_mean(){
@@ -204,6 +230,8 @@ public class Word_Stats implements Comparable<Word_Stats> {
 			DAL_activity.add(score.get_active());
 			DAL_image.add(score.get_image());
 			DAL_valience.add(score.get_valience());
+			DAL_Ratio.add(score.get_DAL_ratio());
+			Hashtags.addAll(score.get_hashtags());
 			
 			if (score.get_Dal_classification() == DAL_Classification.VALID){
 				DAL_valid_freq++;
@@ -230,6 +258,23 @@ public class Word_Stats implements Comparable<Word_Stats> {
 
 	public String get_word() {
 		return word;
+	}
+	
+	public int get_DAL_valid_freq(){
+		return DAL_valid_freq;
+	}
+	
+	public int get_retweet_freq(){
+		return retweet_freq;
+	}
+	
+	public ArrayList<String> get_hashtags(){
+		ArrayList<String> result = new ArrayList<String>();
+		Iterator<String> it_h =  Hashtags.iterator();
+		while (it_h.hasNext())
+			result.add(it_h.next());
+		
+		return result;
 	}
 
 }

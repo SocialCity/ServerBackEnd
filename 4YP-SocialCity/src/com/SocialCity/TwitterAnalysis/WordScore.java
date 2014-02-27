@@ -13,6 +13,8 @@ public class WordScore {
 	private String word = null;
 	
 	private ArrayList<W_Classification> classifications = null;
+	
+	private ArrayList<String> c_classifications = new ArrayList<String>();
 
 	public WordScore(String word, Double val, Double active, Double image, W_Classification classification){
 		classifications = new ArrayList<W_Classification>();
@@ -28,8 +30,16 @@ public class WordScore {
 		this.active = active;
 	} */
 	
+	public void add_category_classification(String classification){
+		c_classifications.add(classification);
+	}
+	
 	public void add_classification(W_Classification classification){
 		classifications.add(classification);
+	}
+	
+	public ArrayList<String> get_category_classification(){
+		return c_classifications;
 	}
 	
 	public ArrayList<W_Classification> get_classification(){

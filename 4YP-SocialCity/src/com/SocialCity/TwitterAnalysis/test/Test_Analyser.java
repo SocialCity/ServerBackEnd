@@ -47,6 +47,7 @@ public class Test_Analyser {
 		result_bloc = ta.analyse_tweets(tw_list);
 		result_bloc.get_adjective_stats_freqsorted().get(0).update_stats();
 		
+		/*
 		for (int j = 0; j < 20; j++){
 		
 			System.out.println("******************* " + j + " ******************************");
@@ -114,13 +115,16 @@ public class Test_Analyser {
 
 
 		}
+		*/
 		
-		result_bloc.get_Category_stats_freqsorted().get(3).update_stats();
-		System.out.println(result_bloc.get_Category_stats_freqsorted().get(3).get_word());
-		System.out.println(result_bloc.get_Category_stats_freqsorted().get(3).get_Frequency());
-		System.out.println(result_bloc.get_Category_stats_freqsorted().get(3).get_valience_varience());
-		System.out.println(result_bloc.get_Category_stats_freqsorted().get(3).get_activity_varience());
-		System.out.println(result_bloc.get_Category_stats_freqsorted().get(3).get_imagery_varience());
+		for (int k = 0; k < result_bloc.get_Category_stats_freqsorted().size(); k++){
+		result_bloc.get_Category_stats_freqsorted().get(k).update_stats();
+		System.out.println(result_bloc.get_Category_stats_freqsorted().get(k).get_word());
+		System.out.println(result_bloc.get_Category_stats_freqsorted().get(k).get_Frequency());
+		System.out.println(result_bloc.get_Category_stats_freqsorted().get(k).get_valience_varience());
+		System.out.println(result_bloc.get_Category_stats_freqsorted().get(k).get_activity_varience());
+		System.out.println(result_bloc.get_Category_stats_freqsorted().get(k).get_imagery_varience());
+		}
 		
 		
 

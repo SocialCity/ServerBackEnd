@@ -2,7 +2,7 @@
 #The category name is indicated with a $ symbol, and the matched words are a comma separated list following a !
 #The name of the category IS NOT added to the list of words used to match in the twitter analysis
 $crime
-!crime, fraud, offense, cybercrime, felony, theft, steal, stealing, stolen
+!crime,fraud,offense,cybercrime,felony,theft,steal,stealing,stolen
 $employment
 !employment,job,money,earning
 $health
@@ -10,4 +10,6 @@ $health
 $Boris_Johnson
 !Boris,Johnson,Mayor
 $travel
-travel, commute
+!travel,commute
+$drugs
+!drugs,heroine,crack,cocaine,weed

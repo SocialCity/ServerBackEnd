@@ -1,6 +1,7 @@
 package com.SocialCity.TwitterAnalysis;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 public class Word_Stats implements Comparable<Word_Stats> {
@@ -13,10 +14,12 @@ public class Word_Stats implements Comparable<Word_Stats> {
 	private ArrayList<Double> DAL_activity; // a list of the activity scores that tweets have with the word in
 	private ArrayList<Double> DAL_image; // a list of the image scores that tweets have with the word in
 	private ArrayList<Double> DAL_valience;	// a list of the valience scores that tweets have with the word in
+	private ArrayList<Double> DAL_Ratio;
+	private HashSet<String> Hashtags;
 	
-	private boolean stats_uptodate = true;
+	private boolean stats_uptodate = false;
 	
-	double stat_activity_varience;
+	double stat_activity_variance;
 	double stat_image_variance;
 	double stat_valience_variance;
 	
@@ -24,13 +27,46 @@ public class Word_Stats implements Comparable<Word_Stats> {
 	double stat_image_mean;
 	double stat_valience_mean;
 	
+	double stat_DAL_ratio_mean;
 	
+	double stat_activity_stddev;
+	double stat_image_stddev;
+	double stat_valience_stddev;
 
 	public Word_Stats(String word){
 		this.word = word;
 		this.DAL_activity = new ArrayList<Double>();
 		this.DAL_image = new ArrayList<Double>();
 		this.DAL_valience = new ArrayList<Double>();
+		this.DAL_Ratio = new ArrayList<Double>();
+		this.Hashtags = new HashSet<String>();
+	}
+	
+	public void update_stats(){
+		get_imagery_stddev();
+		get_activity_stddev();
+		get_valience_stddev();
+		get_DAL_ratio_mean();
+		stats_uptodate = true;
+	}
+	
+	public Double get_DAL_ratio_mean(){
+		
+			double total = 0;
+			if (stats_uptodate == false)
+			{
+				Iterator<Double> it = DAL_Ratio.iterator();
+			
+				while (it.hasNext()){
+					total = total + it.next().doubleValue();
+				}
+				total = total / DAL_Ratio.size();
+			
+				stat_DAL_ratio_mean = total;
+				return stat_DAL_ratio_mean;
+			}
+			else
+				return stat_DAL_ratio_mean;
 	}
 	
 	public Double get_valience_mean(){
@@ -90,6 +126,95 @@ public class Word_Stats implements Comparable<Word_Stats> {
 		}
 	}
 	
+	public Double get_valience_varience(){
+		double total = 0;
+		double mean = 0;
+		double v = 0;
+		
+		if (stats_uptodate == false){
+			mean = get_valience_mean();
+			Iterator<Double> it = DAL_valience.iterator();
+			while (it.hasNext()){
+				v = it.next().doubleValue();
+				total += (mean - v)*(mean - v);
+			}
+			stat_valience_variance =  total/DAL_valience.size();
+			return stat_valience_variance;
+		}
+		
+		else
+		{
+			return stat_valience_variance;
+		}
+	}
+	
+	public Double get_activity_varience(){
+		double total = 0;
+		double mean = 0;
+		double v = 0;
+		
+		if (stats_uptodate == false){
+			mean = get_activity_mean();
+			Iterator<Double> it = DAL_activity.iterator();
+			while (it.hasNext()){
+				v = it.next().doubleValue();
+				total += (mean - v)*(mean - v);
+			}
+			stat_activity_variance =  total/DAL_activity.size();
+			return stat_activity_variance;
+		}
+		
+		else
+		{
+			return stat_activity_variance;
+		}
+	}
+	
+	public Double get_imagery_varience(){
+		double total = 0;
+		double mean = 0;
+		double v = 0;
+		
+		if (stats_uptodate == false){
+			mean = get_imagery_mean();
+			Iterator<Double> it = DAL_image.iterator();
+			while (it.hasNext()){
+				v = it.next().doubleValue();
+				total += (mean - v)*(mean - v);
+			}
+			stat_image_variance =  total/DAL_image.size();
+			return stat_image_variance;
+		}
+		
+		else
+		{
+			return stat_image_variance;
+		}
+	}
+	
+	public Double get_valience_stddev(){
+		
+		if (stats_uptodate == false)
+			stat_valience_stddev = Math.sqrt(get_valience_varience());
+		
+		return stat_valience_stddev;
+	}
+	
+	public Double get_imagery_stddev(){
+		if (stats_uptodate == false)
+				stat_image_stddev =  Math.sqrt(get_imagery_varience());
+		
+		return stat_image_stddev;
+	}
+	
+	public Double get_activity_stddev(){
+		
+		if (stats_uptodate == false)
+				stat_activity_stddev =  Math.sqrt(get_activity_varience());
+		
+		return stat_activity_stddev;
+	}
+	
 	@Override
 	public int compareTo(Word_Stats stat) {
 		Integer f = new Integer(frequency);
@@ -105,6 +230,8 @@ public class Word_Stats implements Comparable<Word_Stats> {
 			DAL_activity.add(score.get_active());
 			DAL_image.add(score.get_image());
 			DAL_valience.add(score.get_valience());
+			DAL_Ratio.add(score.get_DAL_ratio());
+			Hashtags.addAll(score.get_hashtags());
 			
 			if (score.get_Dal_classification() == DAL_Classification.VALID){
 				DAL_valid_freq++;
@@ -131,6 +258,23 @@ public class Word_Stats implements Comparable<Word_Stats> {
 
 	public String get_word() {
 		return word;
+	}
+	
+	public int get_DAL_valid_freq(){
+		return DAL_valid_freq;
+	}
+	
+	public int get_retweet_freq(){
+		return retweet_freq;
+	}
+	
+	public ArrayList<String> get_hashtags(){
+		ArrayList<String> result = new ArrayList<String>();
+		Iterator<String> it_h =  Hashtags.iterator();
+		while (it_h.hasNext())
+			result.add(it_h.next());
+		
+		return result;
 	}
 
 }

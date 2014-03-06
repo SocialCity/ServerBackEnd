@@ -15,7 +15,7 @@ import java.util.List;
 public class Test_tokenizer {
 	
 	static final String mongoHost = "localhost";
-	static final String mongo_DB = "tweetInfo";
+	static final String mongo_DB = "4YP";
 	static final String mongoCollection = "tweets";
 
 	public static void main(String[] args) {

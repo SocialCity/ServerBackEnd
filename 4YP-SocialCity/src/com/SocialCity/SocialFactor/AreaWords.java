@@ -22,6 +22,7 @@ public class AreaWords{
 	private ArrayList<Word> adjective;
 	private ArrayList<Word> verb;
 	private ArrayList<Word> DAL;
+	private ArrayList<Word> Cats;
 	
 	public AreaWords (String code) {
 		setCode(code);
@@ -29,6 +30,7 @@ public class AreaWords{
 		adjective = new ArrayList<Word>();
 		verb = new ArrayList<Word>();
 		DAL = new ArrayList<Word>();
+		Cats = new ArrayList<Word>();
 	}
 	
 	public AreaWords (BasicDBObject dbo) {
@@ -39,6 +41,7 @@ public class AreaWords{
 		adjective = new ArrayList<Word>();
 		verb = new ArrayList<Word>();
 		DAL = new ArrayList<Word>();
+		Cats = new ArrayList<Word>();
 		Word word;
 		setCode(dbo.getString("code"));
 		
@@ -82,6 +85,20 @@ public class AreaWords{
 			i++;
 		}
 		
+		i = 0;
+		dbo2 = (BasicDBObject) dbo.get("Catagories");
+		//System.out.println("DAL");
+		while (!(dbo2.get("word"+i) == null)){
+			
+			dbo3 = (BasicDBObject) dbo2.get("word" + i);
+			
+			word = new Word(dbo3.getString("word"), dbo3.getDouble("frequency"), dbo3.getDouble("pleasantness"), dbo3.getDouble("activation"), dbo3.getDouble("imagery"));
+			
+			Cats.add(word);
+			//System.out.println("Catagories");
+			i++;
+		}
+		
 	}
 	
 	public String getCode() {
@@ -113,6 +130,12 @@ public class AreaWords{
 	}
 	public void setDAL(ArrayList<Word> dAL) {
 		DAL = dAL;
+	}
+	public ArrayList<Word> getCatagories() {
+		return Cats;
+	}
+	public void setCatagories(ArrayList<Word> dAL) {
+		Cats = dAL;
 	}
 	
 	public BasicDBObject getDBObject() {
@@ -184,6 +207,22 @@ public class AreaWords{
 			i++;
 		}
 		dbo.append("DAL", sub);
+		
+		sub = new BasicDBObject();
+		i = 0;
+		
+		for (Word w : Cats) {
+			subSub = new BasicDBObject();
+			subSub.append("word", w.getWord());
+			subSub.append("frequency", w.getFrequency());
+			subSub.append("pleasantness", w.getPleasantness());
+			subSub.append("activation", w.getActivation());
+			subSub.append("imagery", w.getImagery());
+	
+			sub.append("word"+i, subSub);
+			i++;
+		}
+		dbo.append("Catagories", sub);
 		
 		return dbo;
 	}

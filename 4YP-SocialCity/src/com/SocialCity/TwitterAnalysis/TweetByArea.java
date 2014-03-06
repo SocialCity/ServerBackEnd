@@ -9,7 +9,9 @@ import org.bson.BasicBSONObject;
 
 import com.SocialCity.Area.CodeNameMap;
 import com.SocialCity.DataParsers.CollectionReader;
+import com.SocialCity.SocialFactor.AreaWords;
 import com.SocialCity.SocialFactor.SocialFactors;
+import com.SocialCity.SocialFactor.Word;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -138,7 +140,7 @@ public class TweetByArea {
 	}
 	
 	//create a social factors object for devices
-	public void deviceFactors(String tweetName, String devFacName) throws UnknownHostException {
+	public void deviceFactors(String tweetName, String devFacName, String devWordsName, String wordName) throws UnknownHostException {
 		
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
@@ -146,25 +148,45 @@ public class TweetByArea {
 		DBCollection tweets = db.getCollection(tweetName);
 		DB db2 = mongoClient.getDB( "deviceBreakdown" );
 		
+		DBCollection wordStore = db.getCollection(wordName);
 		DBCollection deviceStore = db2.getCollection(devFacName);
-		
+		DBCollection newColl = db.createCollection(devWordsName, null);
 		DB areas = mongoClient.getDB("areas");
 		DBCollection boroughs = areas.getCollection("boroughs2012");
-		
+		ArrayList<Tweet_Obj> tw_list;
 		HashMap<String, String> nameMap = codeNameMap.getNameMap();
 		DBCursor results;
 		HashSet<String> devices = getDevices(tweetName);
 		HashMap<String, Integer> placeRatio;
 		BasicDBObject places;
 		BasicDBObject combiner;
+		BasicDBObject dbo;
 		String placeName;
 		int count = 1;
 		CodeNameMap cnm = new CodeNameMap();
 		SocialFactors deviceFactors;
-		
+		String text;
 		boolean relevant;
 		SocialFactors boroughFactors;
 		int total;
+		ArrayList<Word_Stats> words;
+		Tweet_Info_Bloc resultBlock;
+		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt", "resources/Categories.txt");
+		double act = 0;
+		double image = 0;
+		double valience = 0;
+		BasicDBObject map;
+		ArrayList<Word_Stats> adj;
+		ArrayList<Word_Stats> noun;
+		ArrayList<Word_Stats> verb;
+		ArrayList<Word_Stats> dal;
+		ArrayList<Word_Stats> cats;
+		ArrayList<Word> adjW = new ArrayList<Word>();
+		ArrayList<Word> nounW = new ArrayList<Word>();
+		ArrayList<Word> verbW = new ArrayList<Word>();
+		ArrayList<Word> dalW = new ArrayList<Word>();
+		ArrayList<Word> catsW = new ArrayList<Word>();
+		AreaWords aW;
 		
 		for (String device : devices) {
 			System.out.println("----------");
@@ -177,9 +199,11 @@ public class TweetByArea {
 			results = tweets.find(query);//find all tweets using current device
 			deviceFactors = new SocialFactors(newName.trim());
 			total=0;
+			tw_list = new ArrayList<Tweet_Obj>();
 			
 			while (results.hasNext()){
-				places = (BasicDBObject)results.next().get("place");
+				dbo = (BasicDBObject) results.next();
+				places = (BasicDBObject) dbo.get("place");
 				placeName = "";
 				if (places != null) {//need to get name for place tweet occured, make sure its a borough
 					placeName = places.getString("name");
@@ -194,6 +218,8 @@ public class TweetByArea {
 			        count++;
 				}
 				placeRatio.put(placeName, count);
+				text =  dbo.getString("text");
+				tw_list.add(new Tweet_Obj(text));
 			}
 			
 			double crimeRate = 0;
@@ -263,6 +289,76 @@ public class TweetByArea {
 				relevant = false;
 			}
 			
+			resultBlock = ta.analyse_tweets(tw_list);
+
+			act = resultBlock.get_mean_activity();
+			image = resultBlock.get_mean_imagery();
+			valience = resultBlock.get_mean_valience();
+			
+			map = new BasicDBObject ();
+			
+			map.put("code", newName);
+			map.put("activation", act);
+			map.put("imagery", image);
+			map.put("pleasantness", valience);
+			
+			newColl.insert(map);
+			
+			adj = resultBlock.get_adjective_stats_freqsorted();
+			noun = resultBlock.get_noun_stats_freqsorted();
+			verb = resultBlock.get_verb_stats_freqsorted();
+			dal = resultBlock.get_DAL_stats_freqsorted();
+			cats = resultBlock.get_Category_stats_freqsorted();
+			System.out.println("Categories: " + cats.size());
+			
+			adjW = new ArrayList<Word>();
+			nounW = new ArrayList<Word>();
+			verbW = new ArrayList<Word>();
+			dalW = new ArrayList<Word>();
+			catsW = new ArrayList<Word>();
+			
+			aW = new AreaWords(newName);
+			int i = 0;
+			while (i < 10 && i < adj.size()) {
+				adjW.add(new Word(adj.get(i)));
+				i++;
+			}
+			
+			i = 0;
+			
+			while (i < 10 && i < noun.size()) {
+				nounW.add(new Word(noun.get(i)));
+				i++;
+			}
+			
+			i = 0;
+			
+			while (i < 10 && i < verb.size()) {
+				verbW.add(new Word(verb.get(i)));
+				i++;
+			}
+			
+			i = 0;
+			
+			while (i < 10 && i < dal.size()) {
+				dalW.add(new Word(dal.get(i)));
+				i++;
+			}
+			
+			i = 0;
+			
+			while (i < 10 && i < cats.size()) {
+				catsW.add(new Word(cats.get(i)));
+				i++;
+			}
+			
+			aW.setAdjective(adjW);
+			aW.setNouns(nounW);
+			aW.setVerb(verbW);
+			aW.setDAL(dalW);
+			aW.setCatagories(catsW);
+			
+			wordStore.insert(aW.getDBObject());
 			
 		}
 		

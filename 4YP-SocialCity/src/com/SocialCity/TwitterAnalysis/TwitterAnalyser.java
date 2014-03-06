@@ -21,22 +21,40 @@ public class TwitterAnalyser {
 	private HashSet<String> Wordnet_noun_hashset = new HashSet<String>();
 	private HashSet<String> Wordnet_adjective_hashset = new HashSet<String>();
 	private HashSet<String> Wordnet_verb_hashset = new HashSet<String>();
-
+	
+	private ArrayList<HashSet> Category_hashsets = new ArrayList<HashSet>();
+	private ArrayList<String> Category_names = new ArrayList<String>();
 
 	private Twokenizer tw = null;
 
-	public TwitterAnalyser(String DAL_file_path, String Wordnet_file_path){
+	public TwitterAnalyser(String DAL_file_path, String Wordnet_file_path, String Categories_file){
 		//build the hash set used for analysis
 		ArrayList<WordScore> DAL_scores = readDAL(DAL_file_path);
 		ArrayList<String> wordnet_noun_words = readWordNet(Wordnet_file_path, "n");
 		ArrayList<String> wordnet_verb_words = readWordNet(Wordnet_file_path, "v");
 		ArrayList<String> wordnet_adjective_words = readWordNet(Wordnet_file_path, "a");
-
+		
 		buildHashMap(DAL_hashmap, DAL_scores);
 		buildHashSet(Wordnet_noun_hashset, wordnet_noun_words);
 		buildHashSet(Wordnet_verb_hashset, wordnet_verb_words);
 		buildHashSet(Wordnet_adjective_hashset, wordnet_adjective_words);
 
+		//get dynamic categories
+		ArrayList<ArrayList<String>> Categories_text_list = readCategories(Categories_file);
+		
+		Iterator<ArrayList<String>> it_c = Categories_text_list.iterator();
+		
+		while (it_c.hasNext()){
+			ArrayList<String> list = (ArrayList) it_c.next();
+			Category_names.add(list.get(0));
+			list.remove(0);
+			HashSet hs = new HashSet();
+			buildHashSet(hs, list);
+			Category_hashsets.add(hs);
+		}
+		//build dynamic hash sets for categories
+		
+		
 		//build twokenizer
 		tw = new Twokenizer();
 	}
@@ -87,6 +105,50 @@ public class TwitterAnalyser {
 		}
 		return words;
 	}
+	
+	private ArrayList<ArrayList<String>> readCategories(String file){
+		BufferedReader br;
+		String line;
+		ArrayList<ArrayList<String>> categories = new ArrayList<ArrayList<String>>();
+		String[] values = null;
+		ArrayList<String> c = new ArrayList<String>();
+		
+		//read in file and create arraylist of scores
+		try{
+			br = new BufferedReader(new FileReader(file));
+			while ((line = br.readLine()) != null) {
+				if (!line.startsWith("#")){
+					line = squeezeWhitespace(line);
+					
+					//new category found
+					if(line.startsWith("$")){
+						if (c.size() > 0){
+							categories.add(c);
+						}
+						c = new ArrayList<String>();
+						c.add(line.substring(1).toLowerCase());
+					}
+					
+					if(line.startsWith("!")){
+						values = line.split(",");
+						c.add(values[0].substring(1).toLowerCase());
+						for (int i = 1; i < values.length; i ++)
+						{
+							c.add(values[i].toLowerCase());
+						}
+					}
+				
+				}
+		}
+			categories.add(c);
+			br.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		
+		return categories;
+	}
 		
 	//read in the DAL file and return a set of word scores
 	private ArrayList<WordScore> readDAL(String file){
@@ -100,7 +162,7 @@ public class TwitterAnalyser {
 			br = new BufferedReader(new FileReader(file));
 			while ((line = br.readLine()) != null) {
 				if (!line.startsWith("#")){
-				//	System.out.println(line);
+					
 					line = squeezeWhitespace(line);
 					values = line.split(" ");
 					//create score object
@@ -125,6 +187,7 @@ public class TwitterAnalyser {
 		//analyse individual word/token
 		token = token.toLowerCase();
 		ArrayList<W_Classification> classifications = new ArrayList<W_Classification>();
+		ArrayList<String> category_classifications = new ArrayList<String>();
 		WordScore result = null;
 		//is a matched word in the DAL set
 		if (DAL_hashmap.containsKey(token)){
@@ -156,31 +219,52 @@ public class TwitterAnalyser {
 			classifications.add(W_Classification.ATSymbol);
 		}
 		
+		//matched to categories hashsets
+		
+		Iterator<HashSet> cat_it = Category_hashsets.iterator(); 
+		int j = 0;
+		while(cat_it.hasNext()){
+			if (cat_it.next().contains(token)){
+				category_classifications.add(Category_names.get(j));
+			}
+			j++;
+		}
+		
+
+		
 		//generate output
 		
 		if(result == null){
-			if (classifications.size() == 0){
-				//no match
+			
 				result = new WordScore(token, -1.0, -1.0, -1.0, W_Classification.UNMATCHED);
-			}
+			
 			if (classifications.size() >= 1){
 				//got a classification (or more) but not DAL
-				result = new WordScore(token, -1.0, -1.0, -1.0, classifications.get(0));
-				for (int i = 1; i<classifications.size();  i++)
+				for (int i = 0; i<classifications.size();  i++)
 				{
 					result.add_classification(classifications.get(i));
 				}	
 			}
+			if (category_classifications.size() >= 1){
+				//got a classification (or more) but not DAL
+				for (int i = 0; i<category_classifications.size();  i++)
+				{
+					result.add_category_classification(category_classifications.get(i));
+				}	
+			}
+		}
 		else{
 			//return DAL plus any other classifications
-			for (int i = 0; i<classifications.size()-1;  i++)
+			for (int i = 0; i<classifications.size();  i++)
 				{
 					result.add_classification(classifications.get(i));
 				}
+			for (int i = 0; i<category_classifications.size();  i++)
+			{
+				result.add_category_classification(category_classifications.get(i));
 			}
-	}		
-
-		
+		}
+			
 		return result;
 	}
 	
@@ -220,6 +304,8 @@ public class TwitterAnalyser {
 		double avg_image = 0.0;
 		double matched_ratio = 0.0;
 		
+		double DAL_ratio = 0.0;
+		
 		double total_val = 0.0;
 		double total_active = 0.0;
 		double total_image = 0.0;
@@ -235,6 +321,7 @@ public class TwitterAnalyser {
 		Iterator<WordScore> it_ws = token_scores.iterator();
 		ArrayList<String> hashtags = new ArrayList<String>();
 		ArrayList<String> AT_tags = new ArrayList<String>();
+		ArrayList<String> category_classifications = new ArrayList<String>();
 		boolean retweet = false;
 
 		while (it_ws.hasNext()){
@@ -267,18 +354,24 @@ public class TwitterAnalyser {
 				total_matched_words++;
 			}
 			
-			else if (score.get_classification().contains(W_Classification.HASHTAG)){
+			if (score.get_classification().contains(W_Classification.HASHTAG)){
 				hashtags.add(score.get_word());
 				total_matched_words++;
 			}
-			else if (score.get_classification().contains(W_Classification.RETWEET)){
+			if (score.get_classification().contains(W_Classification.RETWEET)){
 				retweet = true;
 				total_matched_words++;
 			}
-			else if (score.get_classification().contains(W_Classification.ATSymbol)){
+			if (score.get_classification().contains(W_Classification.ATSymbol)){
 				AT_tags.add(score.get_word());
 				total_matched_words++;
-				
+			}
+			
+			//check dynamic category matches
+			for (int n = 0; n < Category_names.size(); n++){
+				if (score.get_category_classification().contains(Category_names.get(n))){
+					category_classifications.add(Category_names.get(n));
+				}
 			}
 		}
 		
@@ -293,6 +386,7 @@ public class TwitterAnalyser {
 			avg_active = total_active / DAL_count;
 			avg_val = total_val / DAL_count;
 			avg_image = total_image / DAL_count;
+			DAL_ratio = DAL_count / total_matched_words;
 			dal_classification = DAL_Classification.VALID;
 
 		}
@@ -301,6 +395,7 @@ public class TwitterAnalyser {
 			avg_active = -1.0;
 			avg_val = -1.0;
 			avg_image = -1.0;
+			DAL_ratio = 0;
 			dal_classification = DAL_Classification.INVALID;
 
 		}
@@ -317,14 +412,15 @@ public class TwitterAnalyser {
 		
 		
 				
-		//build new tweet score object and return it
-		TweetScore ts =  new TweetScore(tweet, avg_val, avg_active, avg_image, matched_ratio, dal_classification, retweet);
+		//build new tweet score objects and return them
+		TweetScore ts =  new TweetScore(tweet, avg_val, avg_active, avg_image, matched_ratio, dal_classification,DAL_ratio, retweet);
 		ts.set_matched_DAL_words(matched_DAL_words);
 		ts.set_Matched_nouns(matched_nouns);
 		ts.set_Matched_verbs(matched_verbs);
 		ts.set_Matched_adjectives(matched_adjectives);
 		ts.add_hashtags(hashtags);
 		ts.add_at_tags(AT_tags);
+		ts.set_category_matches(category_classifications);
 		return ts;
 	}
 
@@ -348,7 +444,7 @@ public class TwitterAnalyser {
 	private Tweet_Info_Bloc build_bloc(ArrayList<TweetScore> scores){
 		
 		// info bloc containing results
-		Tweet_Info_Bloc results_bloc = new Tweet_Info_Bloc(scores);
+		Tweet_Info_Bloc results_bloc = new Tweet_Info_Bloc(scores, Category_names);
 		//add the scores to the bloc
 			
 		return results_bloc;

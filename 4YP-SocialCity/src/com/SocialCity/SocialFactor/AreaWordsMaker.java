@@ -28,7 +28,7 @@ public class AreaWordsMaker {
 		DBCollection wordStore = db.getCollection(dbName);
 		wordStore.drop();
 		wordStore = db.createCollection(dbName, null);
-		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt");
+		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt", "resources/Categories.txt");
 		CodeNameMap cnm = new CodeNameMap();
 		Set<String> codes = cnm.getBoroughCodes();
 		ArrayList<Tweet_Obj> tw_list;
@@ -40,11 +40,13 @@ public class AreaWordsMaker {
 		ArrayList<Word_Stats> noun;
 		ArrayList<Word_Stats> verb;
 		ArrayList<Word_Stats> dal;
+		ArrayList<Word_Stats> cats;
 		
 		ArrayList<Word> adjW = new ArrayList<Word>();
 		ArrayList<Word> nounW = new ArrayList<Word>();
 		ArrayList<Word> verbW = new ArrayList<Word>();
 		ArrayList<Word> dalW = new ArrayList<Word>();
+		ArrayList<Word> catsW = new ArrayList<Word>();
 		
 		int i = 0;
 		
@@ -69,7 +71,12 @@ public class AreaWordsMaker {
 			noun = resultBlock.get_noun_stats_freqsorted();
 			verb = resultBlock.get_verb_stats_freqsorted();
 			dal = resultBlock.get_DAL_stats_freqsorted();
-			
+			cats = resultBlock.get_Category_stats_freqsorted();
+			adjW = new ArrayList<Word>();
+			nounW = new ArrayList<Word>();
+			verbW = new ArrayList<Word>();
+			dalW = new ArrayList<Word>();
+			catsW = new ArrayList<Word>();
 			aW = new AreaWords(s);
 			
 			while (i < 10 && i < adj.size()) {
@@ -98,12 +105,73 @@ public class AreaWordsMaker {
 				i++;
 			}
 			
+			i = 0;
+			
+			while (i < 10 && i < cats.size()) {
+				catsW.add(new Word(cats.get(i)));
+				i++;
+			}
+			
+			
 			aW.setAdjective(adjW);
 			aW.setNouns(nounW);
 			aW.setVerb(verbW);
 			aW.setDAL(dalW);
+			aW.setCatagories(catsW);
 			
 			wordStore.insert(aW.getDBObject());
+		}
+		
+	}
+	
+	public static void areaSentiment(String tweets, String areaSentiment) throws UnknownHostException {
+		CodeNameMap cnm = new CodeNameMap();
+		Set<String> codes = cnm.getBoroughCodes();
+		
+		BasicDBObject dbo;
+		String text;
+		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt", "resources/Categories.txt");
+		Tweet_Info_Bloc resultBlock;
+		ArrayList<Tweet_Obj> tw_list;
+		ArrayList<Word_Stats> words;
+		
+		BasicDBObject query;
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "tweetInfo" );
+		DBCollection coll = db.getCollection(tweets);
+		DBCollection newColl = db.createCollection(areaSentiment, null);
+		
+		double act = 0;
+		double image = 0;
+		double valience = 0;
+		BasicDBObject map;
+
+		for (String s: codes) {
+			query = new BasicDBObject();
+			query.put("place.name", cnm.getName(s));
+			DBCursor dbC = coll.find(query);
+			
+			tw_list = new ArrayList<Tweet_Obj>();
+			
+			while (dbC.hasNext()) {
+				dbo = (BasicDBObject) dbC.next();
+				text =  dbo.getString("text");
+				tw_list.add(new Tweet_Obj(text));
+			}
+			
+			resultBlock = ta.analyse_tweets(tw_list);
+			
+			act = resultBlock.get_mean_activity();
+			image = resultBlock.get_mean_imagery();
+			valience = resultBlock.get_mean_valience();
+			
+			map = new BasicDBObject ();
+			map.put("code", s);
+			map.put("activation", act);
+			map.put("imagery", image);
+			map.put("pleasantness", valience);
+			
+			newColl.insert(map);
 		}
 		
 	}

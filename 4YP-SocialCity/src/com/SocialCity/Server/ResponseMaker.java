@@ -251,7 +251,7 @@ public class ResponseMaker {
 		return combined;
 	}
 
-	public String hashTags(String tag1, String tag2, String time) throws UnknownHostException {
+	public String hashTags(String tag1, String time) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
 		DBCollection hashTagInfo;
@@ -266,12 +266,8 @@ public class ResponseMaker {
 		BasicDBObject query = new BasicDBObject("locations", new BasicDBObject("ward0", tag1));
 		SocialFactors tag1Factors = new SocialFactors(hashTagInfo.findOne(query));
 		
-		query = new BasicDBObject("locations", new BasicDBObject("ward0", tag2));
-		SocialFactors tag2Factors = new SocialFactors(hashTagInfo.findOne(query));
-		
 		ArrayList<SocialFactors> listOfData = new ArrayList<SocialFactors>();
 		listOfData.add(tag1Factors);
-		listOfData.add(tag2Factors);
 		
 		Gson gson = new Gson();
 		return gson.toJson(listOfData);
@@ -420,8 +416,38 @@ public class ResponseMaker {
 		Gson gson = new Gson();
 		return gson.toJson(list);
 	}
+	
+	public String getSentiment(String code, String time, String collection)throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "tweetInfo" );
+		DBCollection coll ;
+		Gson gson = new Gson();
+		
+		HashMap<String, Object> map = new HashMap<String, Object>();
 
-	public String getWords(int wordCode, String boroughCode, String time) throws UnknownHostException {
+		if (time == null) {
+			coll = db.getCollection(new CollectionReader().returnName(collection));
+		}
+		else {
+			coll = db.getCollection(collection +"_"+time);
+		}
+		
+		BasicDBObject query = new BasicDBObject("code", code);
+		
+		DBCursor dbc = coll.find(query);
+
+		System.out.println(coll.find().next());
+		BasicDBObject dbo = (BasicDBObject) dbc.next();
+		
+		map.put("code", dbo.get("code"));
+		map.put("activation", dbo.get("activation"));
+		map.put("imagery", dbo.get("imagery"));
+		map.put("pleasantness", dbo.get("pleasantness"));
+		
+		return gson.toJson(map);
+	}
+	
+	public String getWords(int wordCode, String code, String time, String collection) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
 		DBCollection coll ;
@@ -430,13 +456,13 @@ public class ResponseMaker {
 		HashMap<String, Object> result = new HashMap<String, Object>();
 
 		if (time == null) {
-			coll = db.getCollection(new CollectionReader().returnName("wordsInfo"));
+			coll = db.getCollection(new CollectionReader().returnName(collection));
 		}
 		else {
-			coll = db.getCollection("words_"+time);
+			coll = db.getCollection(collection +"_"+time);
 		}
 		
-		BasicDBObject query = new BasicDBObject("code", boroughCode);
+		BasicDBObject query = new BasicDBObject("code", code);
 		
 		DBCursor dbc = coll.find(query);
 		BasicDBObject dbo = (BasicDBObject) dbc.next();
@@ -452,6 +478,7 @@ public class ResponseMaker {
 			result.put("adjective", aw.getAdjective());
 			result.put("verb", aw.getVerb());
 			result.put("DAL", aw.getDAL());
+			result.put("Catagories", aw.getCatagories());
 			break;
 		case 1:
 			result.put("nouns", aw.getNouns());
@@ -464,6 +491,9 @@ public class ResponseMaker {
 			break;
 		case 4:
 			result.put("DAL", aw.getDAL());
+			break;
+		case 5:
+			result.put("Catagories", aw.getCatagories());
 			break;
 		}
 		

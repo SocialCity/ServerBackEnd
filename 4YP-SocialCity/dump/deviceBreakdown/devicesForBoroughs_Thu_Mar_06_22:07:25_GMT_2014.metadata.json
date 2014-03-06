@@ -1,0 +1,1 @@
+{ "indexes" : [ { "v" : 1, "key" : { "_id" : 1 }, "ns" : "deviceBreakdown.devicesForBoroughs_Thu_Mar_06_22:07:25_GMT_2014", "name" : "_id_" } ] }

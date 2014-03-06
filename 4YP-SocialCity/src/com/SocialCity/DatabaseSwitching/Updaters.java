@@ -47,15 +47,22 @@ public class Updaters {
 		String devListName = "deviceList_" + date.toString();
 		String devForBoName = "devicesForBoroughs_" + date.toString();
 		String wordsName = "wordsInfo_" + date.toString();
+		String devSent = "deviceSentiment_" + date.toString();
+		String devWords = "deviceWords_" + date.toString();
+		String areaSentiment = "areaSentiment_" + date.toString();
+		String hashSentiment = "hashtagSentiment_" + date.toString();
+		String hashWordName = "hashtagWords_" + date.toString();
 		
 		HashTag.topHashTags(tweetName,hashTagName,topTagsName,tagListName); 
-		HashTag.tagLocationInfo(tweetName, tagInfoName, topTagsName);
+		HashTag.tagLocationInfo(tweetName, tagInfoName, topTagsName, tagListName);
 		tba.tweetProportions(propName, tweetName);
-		tba.deviceFactors(tweetName, devFacName);
+		tba.deviceFactors(tweetName, devFacName, devSent, devWords );
 		tba.createDeviceList(tweetName, devListName);
 		tba.deviceBreakdown(tweetName, devForBoName);
 		AreaWordsMaker.createDatabase(tweetName, wordsName);
-		
+		AreaWordsMaker.areaSentiment(tweetName, areaSentiment);
+		HashTag.hashtagWords(tweetName, hashSentiment, hashWordName, date.toString());
+		System.out.println("out?");
 		try {
 			CollectionReader.editName("hashtag", hashTagName);
 			CollectionReader.editName("topHashTags", topTagsName);
@@ -66,6 +73,11 @@ public class Updaters {
 			CollectionReader.editName("deviceList", devListName);
 			CollectionReader.editName("devicesForBoroughs", devForBoName);
 			CollectionReader.editName("wordsInfo", wordsName);
+			CollectionReader.editName("deviceSentiment", devSent);
+			CollectionReader.editName("deviceWords", devWords);
+			CollectionReader.editName("areaSentiment", areaSentiment);
+			CollectionReader.editName("hashtagSentiment", hashSentiment);
+			CollectionReader.editName("hashtagWords", hashWordName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -80,7 +92,7 @@ public class Updaters {
 	}
 	public static void main(String[] args) throws Exception
 	{
-		update(args[0]);
+		update("tweets");
 	}
 
 }

@@ -21,36 +21,108 @@ import com.mongodb.MongoClient;
 public class Test_Analyser {
 
 	static final String mongoHost = "localhost";
-	static final String mongo_DB = "tweetInfo";
+	static final String mongo_DB = "4YP";
 	static final String mongoCollection = "tweets";
 	
 	public static void main(String[] args) {
 		
+		
+		//build analyser
+		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt", "resources/Categories.txt");
 		//bloc for results
 		Tweet_Info_Bloc result_bloc;
 		
 		//get and prepare tweets
 		ArrayList<String> tweets = getTweets();
+		System.out.println(tweets.size());
 		ArrayList<Tweet_Obj> tw_list = new ArrayList<Tweet_Obj>();
 		Iterator<String> i = tweets.iterator();
 		while(i.hasNext()){
 			tw_list.add(new Tweet_Obj(i.next()));
 		}
 		
-		//build analyser
-		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt");
+		
 		
 		//analyse tweets
 		result_bloc = ta.analyse_tweets(tw_list);
-		System.out.println(result_bloc.get_adjective_stats_freqsorted().size());
-		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(0).get_word());
-		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(0).get_activity_mean());
+		result_bloc.get_adjective_stats_freqsorted().get(0).update_stats();
 		
-		System.out.println(result_bloc.get_noun_stats_freqsorted().get(4).get_word());
-		System.out.println(result_bloc.get_noun_stats_freqsorted().get(4).get_Frequency());
+		for (int j = 0; j < 20; j++){
 		
-		System.out.println(result_bloc.get_verb_stats_freqsorted().get(1).get_word());
-		System.out.println(result_bloc.get_verb_stats_freqsorted().get(1).get_Frequency());
+			System.out.println("******************* " + j + " ******************************");
+			
+		result_bloc.get_noun_stats_freqsorted().get(j).update_stats();
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(j).get_word());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(j).get_Frequency());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(j).get_valience_varience());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(j).get_activity_varience());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(j).get_imagery_varience());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(j).get_DAL_valid_freq());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(j).get_retweet_freq());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(j).get_DAL_ratio_mean());
+		System.out.println(result_bloc.get_adjective_stats_freqsorted().get(j).get_hashtags().toString());
+
+		
+	
+		result_bloc.get_noun_stats_freqsorted().get(j).update_stats();
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(j).get_word());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(j).get_Frequency());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(j).get_valience_varience());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(j).get_activity_varience());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(j).get_imagery_varience());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(j).get_DAL_valid_freq());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(j).get_retweet_freq());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(j).get_DAL_ratio_mean());
+		System.out.println(result_bloc.get_noun_stats_freqsorted().get(j).get_hashtags().toString());
+
+
+		
+		result_bloc.get_verb_stats_freqsorted().get(j).update_stats();
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(j).get_word());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(j).get_Frequency());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(j).get_valience_varience());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(j).get_activity_varience());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(j).get_imagery_varience());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(j).get_DAL_valid_freq());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(j).get_retweet_freq());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(j).get_DAL_ratio_mean());
+		System.out.println(result_bloc.get_verb_stats_freqsorted().get(j).get_hashtags().toString());
+
+		
+		result_bloc.get_DAL_stats_freqsorted().get(j).update_stats();
+		System.out.println(result_bloc.get_DAL_stats_freqsorted().get(j).get_word());
+		System.out.println(result_bloc.get_DAL_stats_freqsorted().get(j).get_Frequency());
+		System.out.println(result_bloc.get_DAL_stats_freqsorted().get(j).get_valience_varience());
+		System.out.println(result_bloc.get_DAL_stats_freqsorted().get(j).get_activity_varience());
+		System.out.println(result_bloc.get_DAL_stats_freqsorted().get(j).get_imagery_varience());
+		System.out.println(result_bloc.get_DAL_stats_freqsorted().get(j).get_DAL_valid_freq());
+		System.out.println(result_bloc.get_DAL_stats_freqsorted().get(j).get_retweet_freq());
+		System.out.println(result_bloc.get_DAL_stats_freqsorted().get(j).get_DAL_ratio_mean());
+		System.out.println(result_bloc.get_DAL_stats_freqsorted().get(j).get_hashtags().toString());
+
+
+		result_bloc.get_hashtags_stats_freqsorted().get(j).update_stats();
+		System.out.println(result_bloc.get_hashtags_stats_freqsorted().get(j).get_word());
+		System.out.println(result_bloc.get_hashtags_stats_freqsorted().get(j).get_Frequency());
+		System.out.println(result_bloc.get_hashtags_stats_freqsorted().get(j).get_valience_varience());
+		System.out.println(result_bloc.get_hashtags_stats_freqsorted().get(j).get_activity_varience());
+		System.out.println(result_bloc.get_hashtags_stats_freqsorted().get(j).get_imagery_varience());
+		System.out.println(result_bloc.get_hashtags_stats_freqsorted().get(j).get_DAL_valid_freq());
+		System.out.println(result_bloc.get_hashtags_stats_freqsorted().get(j).get_retweet_freq());
+		System.out.println(result_bloc.get_hashtags_stats_freqsorted().get(j).get_DAL_ratio_mean());
+		System.out.println(result_bloc.get_hashtags_stats_freqsorted().get(j).get_hashtags().toString());
+
+
+		}
+		
+		result_bloc.get_Category_stats_freqsorted().get(3).update_stats();
+		System.out.println(result_bloc.get_Category_stats_freqsorted().get(3).get_word());
+		System.out.println(result_bloc.get_Category_stats_freqsorted().get(3).get_Frequency());
+		System.out.println(result_bloc.get_Category_stats_freqsorted().get(3).get_valience_varience());
+		System.out.println(result_bloc.get_Category_stats_freqsorted().get(3).get_activity_varience());
+		System.out.println(result_bloc.get_Category_stats_freqsorted().get(3).get_imagery_varience());
+		
+		
 
 		// ***** print out variables from result_bloc ******* //
 	
@@ -73,7 +145,7 @@ public class Test_Analyser {
 			
 			// use the query for a certain place
 			DBCursor t = coll.find(query);
-			System.out.println(t.size());
+			
 			//get all tweets
 			//DBCursor t =coll.find();
 			for (DBObject dbo : t) {;

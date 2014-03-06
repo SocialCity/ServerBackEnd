@@ -30,14 +30,19 @@ import com.mongodb.MongoClient;
 	//		factor, false just the factor requested)
 	//-http://localhost:8080/twoFactors/factorNumber1/factorNumber2/booleanForUsingWards(true)OrBoroughs(false)/booleanForCombining(true for combine)/booleanForAllFactors(true returns every
 	//		factor, false just the factors requested)
-	//-http://localhost:8080/hashTagFactors/tag1/tag2
+	//-http://localhost:8080/hashTagFactors/tag1/
 	//-http://localhost:8080/hashTagList
 	//-http://localhost:8080/devicesForBorough/boroughCode
 	//-http://localhost:8080/deviceList
 	//-http://localhost:8080/deviceFactor/device1
 	//-http://localhost:8080/factorList
 	//-http://localhost:8080/timestamps
-	//http://localhost:8080/words/wordCodeNum/boroughCode
+	//http://localhost:8080/areaWords/wordCodeNum/boroughCode
+	//http://localhost:8080/hashtagWords/wordCodeNum/hashtag
+	//http://localhost:8080/deviceWords/wordCodeNum/device
+	//http://localhost:8080/areaSentiment/boroughCode
+	//http://localhost:8080/hashtagSentiment/hashtag
+	//http://localhost:8080/deviceSentiment/device
 public class RequestHandler extends AbstractHandler {
 	
 	private static ResponseMaker rM;
@@ -52,7 +57,7 @@ public class RequestHandler extends AbstractHandler {
 		boolean useWards;
 		boolean combine;
 		boolean all;
-		String year = null;
+		String year = "";
 		String time = null;
 		
 		try{
@@ -83,10 +88,10 @@ public class RequestHandler extends AbstractHandler {
 					response.getWriter().println(reply);
 					break;
 				case "hashTagFactors":
-					if (paths.length > 4) {
-						time = paths[4];
+					if (paths.length > 3) {
+						time = paths[3];
 					}
-					reply = rM.hashTags(paths[2], paths[3], time);
+					reply = rM.hashTags(paths[2], time);
 					response.getWriter().println(reply);
 					break;
 				case "hashTagList":
@@ -126,11 +131,46 @@ public class RequestHandler extends AbstractHandler {
 					reply = rM.getTimes();
 					response.getWriter().println(reply);
 					break;
-				case "words":
+				case "areaWords":
 					if (paths.length > 4) {
 						time = paths[4];
 					}
-					reply = rM.getWords(Integer.parseInt(paths[2]), paths[3], time);
+					reply = rM.getWords(Integer.parseInt(paths[2]), paths[3], time, "wordsInfo");
+					response.getWriter().println(reply);
+					break;
+				case "hashtagWords":
+					if (paths.length > 4) {
+						time = paths[4];
+					}
+					reply = rM.getWords(Integer.parseInt(paths[2]), paths[3], time, "hashtagWords");
+					response.getWriter().println(reply);
+					break;
+				case "deviceWords":
+					if (paths.length > 4) {
+						time = paths[4];
+					}
+					reply = rM.getWords(Integer.parseInt(paths[2]), paths[3], time, "deviceWords");
+					response.getWriter().println(reply);
+					break;
+				case "areaSentiment":
+					if (paths.length > 3) {
+						time = paths[3];
+					}
+					reply = rM.getSentiment(paths[2], time, "areaSentiment");
+					response.getWriter().println(reply);
+					break;
+				case "hashtagSentiment":
+					if (paths.length > 3) {
+						time = paths[3];
+					}
+					reply = rM.getSentiment(paths[2], time, "hashtagSentiment");
+					response.getWriter().println(reply);
+					break;
+				case "deviceSentiment":
+					if (paths.length > 3) {
+						time = paths[3];
+					}
+					reply = rM.getSentiment(paths[2], time, "deviceSentiment");
 					response.getWriter().println(reply);
 					break;
 				default: throw new Exception();
@@ -138,7 +178,7 @@ public class RequestHandler extends AbstractHandler {
 			}
 		}
 		catch (Exception e) {
-			response.getWriter().println("<h1>404 - Check yo' self fore you wreck yo' self</h1>");
+			response.getWriter().println("<h1>404 - There is nothing for you here</h1>");
 		}
 	}
 	//Main to start server
@@ -146,12 +186,13 @@ public class RequestHandler extends AbstractHandler {
 	{
 		rM = new ResponseMaker();
 		//rM.getDeviceFactors("foursquare");
-		Server server = new Server(8080);
+		Server server = new Server(9113);
 		server.setHandler(new RequestHandler());
 		
 		server.start();
 		server.join();
-		
+	//	AreaWordsMaker.areaSentiment("tweets", "bitches");
+		//new TweetByArea().deviceFactors("tweets", "test", "testy", "supertest" );
 		//AreaWordsMaker.createDatabase("tweets", "wordsInfo");
 		//new ExcelParsing().parse();
 		//Updaters.update("tweets");

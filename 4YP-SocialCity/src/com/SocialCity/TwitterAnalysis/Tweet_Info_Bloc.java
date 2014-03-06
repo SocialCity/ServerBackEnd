@@ -21,9 +21,13 @@ public class Tweet_Info_Bloc {
 	private HashMap<String, Word_Stats> dal_map = new HashMap<String,Word_Stats>();
 	private HashMap<String, Word_Stats> noun_map = new HashMap<String,Word_Stats>();
 	private HashMap<String, Word_Stats> verb_map = new HashMap<String,Word_Stats>();
+	private HashMap<String, Word_Stats> hashtags_map = new HashMap<String,Word_Stats>();
+	
+	private HashMap<String, Word_Stats> category_map = new HashMap<String, Word_Stats>();
+	private ArrayList<String> category_names = new ArrayList<String>();
 
 	
-	Tweet_Info_Bloc(ArrayList<TweetScore> scores){
+	Tweet_Info_Bloc(ArrayList<TweetScore> scores, ArrayList<String >category_names){
 		// store scores
 		this.scores = scores;
 		Iterator<TweetScore> it_ts= scores.iterator();
@@ -55,6 +59,21 @@ public class Tweet_Info_Bloc {
 			Iterator<String> adjectives = tweet_sc.get_Matched_adjectives().iterator();
 			Iterator<String> verbs  = tweet_sc.get_Matched_verbs().iterator();
 			Iterator<String> nouns = tweet_sc.get_Matched_nouns().iterator();
+			Iterator<String> cats = tweet_sc.get_category_matches().iterator();
+			Iterator<String> hashtags = tweet_sc.get_hashtags().iterator();
+			
+			while (cats.hasNext()){
+				String category_name = cats.next();
+						
+				if(category_map.containsKey(category_name)){
+					category_map.get(category_name).add_score(tweet_sc);
+				}
+				else{
+					Word_Stats n = new Word_Stats(category_name);
+					n.add_score(tweet_sc);
+					category_map.put(category_name, n);
+				}
+			}
 			
 			while (dal_words.hasNext()){
 				String word = dal_words.next();
@@ -104,6 +123,18 @@ public class Tweet_Info_Bloc {
 				}
 			}
 			
+			while (hashtags.hasNext()){
+				String word = hashtags.next();
+				if(hashtags_map.containsKey(word)){
+					hashtags_map.get(word).add_score(tweet_sc);
+				}
+				else{
+					Word_Stats n = new Word_Stats(word);
+					n.add_score(tweet_sc);
+					hashtags_map.put(word, n);
+				}
+			}
+			
 				
 			}
 		}
@@ -122,6 +153,16 @@ public class Tweet_Info_Bloc {
 		
 		//build array list from adjective map set values
 		ArrayList<Word_Stats> sorted = new ArrayList<Word_Stats>(adjective_map.values());
+		Collections.sort(sorted);
+		Collections.reverse(sorted);
+		return sorted;
+	}
+	
+	public ArrayList<Word_Stats> get_hashtags_stats_freqsorted(){
+		//returns a sorted list of adjectives, sorted in descending order of frequency
+		
+		//build array list from adjective map set values
+		ArrayList<Word_Stats> sorted = new ArrayList<Word_Stats>(hashtags_map.values());
 		Collections.sort(sorted);
 		Collections.reverse(sorted);
 		return sorted;
@@ -155,6 +196,24 @@ public class Tweet_Info_Bloc {
 		Collections.sort(sorted);
 		Collections.reverse(sorted);
 		return sorted;
+	}
+	
+	public ArrayList<Word_Stats> get_Category_stats_freqsorted(){
+		//returns a sorted list of adjectives, sorted in descending order of frequency
+		
+		//build array list from adjective map set values
+		ArrayList<Word_Stats> sorted = new ArrayList<Word_Stats>(category_map.values());
+		Collections.sort(sorted);
+		Collections.reverse(sorted);
+		return sorted;
+	}
+	
+	public ArrayList<Word_Stats> get_Category_stats(){
+		//returns a sorted list of adjectives, sorted in descending order of frequency
+		
+		//build array list from adjective map set values
+		ArrayList<Word_Stats> list = new ArrayList<Word_Stats>(category_map.values());
+		return list;
 	}
 	
 	public ArrayList<TweetScore> get_tweet_scores() {

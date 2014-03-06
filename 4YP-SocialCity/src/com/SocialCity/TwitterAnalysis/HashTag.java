@@ -9,7 +9,9 @@ import java.util.regex.Pattern;
 
 import com.SocialCity.Area.CodeNameMap;
 import com.SocialCity.DataParsers.CollectionReader;
+import com.SocialCity.SocialFactor.AreaWords;
 import com.SocialCity.SocialFactor.SocialFactors;
+import com.SocialCity.SocialFactor.Word;
 import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
@@ -79,6 +81,7 @@ public class HashTag {
 			tag = (BasicDBObject) dbC.next();
 			sortedColl.insert(tag);
 			names.add(tag.getString("hashtag"));
+			System.out.println("name size is : " + names.size());
 		}
 		
 		tag = new BasicDBObject();
@@ -87,7 +90,125 @@ public class HashTag {
 		mongoClient.close();
 	} 
 	
-	public static String getTagList(String time) throws UnknownHostException {
+	public static void hashtagWords(String tweetsName, String hashSentiment, String wordName, String time) throws UnknownHostException {
+		ArrayList<String> tagList = getTagArrayList(time);
+		BasicDBObject query;
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "tweetInfo" );
+		DBCollection coll = db.getCollection(tweetsName);
+		DBCollection newColl = db.createCollection(hashSentiment, null);
+		BasicDBObject dbo;
+		String text;
+		TwitterAnalyser ta = new TwitterAnalyser("resources/DAL.txt", "resources/wordnet-core-words.txt", "resources/Categories.txt");
+		Tweet_Info_Bloc resultBlock;
+		ArrayList<Tweet_Obj> tw_list;
+		ArrayList<Word_Stats> words;
+
+		double act = 0;
+		double image = 0;
+		double valience = 0;
+		BasicDBObject map;
+		ArrayList<Word_Stats> adj;
+		ArrayList<Word_Stats> noun;
+		ArrayList<Word_Stats> verb;
+		ArrayList<Word_Stats> dal;
+		ArrayList<Word_Stats> cats;
+		ArrayList<Word> adjW = new ArrayList<Word>();
+		ArrayList<Word> nounW = new ArrayList<Word>();
+		ArrayList<Word> verbW = new ArrayList<Word>();
+		ArrayList<Word> dalW = new ArrayList<Word>();
+		ArrayList<Word> catsW = new ArrayList<Word>();
+		AreaWords aW;
+		DBCollection wordStore = db.getCollection(wordName);
+		int counter = 0;
+		for (String s: tagList) {
+			System.out.println(counter);
+			counter++;
+			query = new BasicDBObject();
+			query.put("text",new BasicDBObject("$regex", String.format(".*((?i)%s).*", "#"+s)));
+			DBCursor dbC = coll.find(query);
+			
+			tw_list = new ArrayList<Tweet_Obj>();
+			
+			while (dbC.hasNext()) {
+				dbo = (BasicDBObject) dbC.next();
+				text =  dbo.getString("text");
+				tw_list.add(new Tweet_Obj(text));
+			}
+			
+			resultBlock = ta.analyse_tweets(tw_list);
+
+			act = resultBlock.get_mean_activity();
+			image = resultBlock.get_mean_imagery();
+			valience = resultBlock.get_mean_valience();
+			
+			map = new BasicDBObject ();
+			map.put("code", s);
+			map.put("activation", act);
+			map.put("imagery", image);
+			map.put("pleasantness", valience);
+			
+			newColl.insert(map);
+			
+			adj = resultBlock.get_adjective_stats_freqsorted();
+			noun = resultBlock.get_noun_stats_freqsorted();
+			verb = resultBlock.get_verb_stats_freqsorted();
+			dal = resultBlock.get_DAL_stats_freqsorted();
+			cats = resultBlock.get_Category_stats_freqsorted();
+			System.out.println("Categories");
+			aW = new AreaWords(s);
+			adjW = new ArrayList<Word>();
+			nounW = new ArrayList<Word>();
+			verbW = new ArrayList<Word>();
+			dalW = new ArrayList<Word>();
+			catsW = new ArrayList<Word>();
+			int i = 0;
+			while (i < 10 && i < adj.size()) {
+				adjW.add(new Word(adj.get(i)));
+				i++;
+			}
+			
+			i = 0;
+			
+			while (i < 10 && i < noun.size()) {
+				nounW.add(new Word(noun.get(i)));
+				i++;
+			}
+			
+			i = 0;
+			
+			while (i < 10 && i < verb.size()) {
+				verbW.add(new Word(verb.get(i)));
+				i++;
+			}
+			
+			i = 0;
+			
+			while (i < 10 && i < dal.size()) {
+				dalW.add(new Word(dal.get(i)));
+				i++;
+			}
+			
+			i = 0;
+			
+			while (i < 10 && i < cats.size()) {
+				catsW.add(new Word(cats.get(i)));
+				i++;
+			}
+			
+			aW.setAdjective(adjW);
+			aW.setNouns(nounW);
+			aW.setVerb(verbW);
+			aW.setDAL(dalW);
+			aW.setCatagories(catsW);
+			wordStore.insert(aW.getDBObject());
+			
+		}
+		
+
+	}
+	
+	public static ArrayList<String> getTagArrayList(String time) throws UnknownHostException {
 		MongoClient mongoClient;
 		mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
@@ -102,21 +223,23 @@ public class HashTag {
 			coll = db.getCollection("tagList_" + time);
 		}
 		
-		System.out.println("say what!?");
-		ArrayList<String> names = (ArrayList<String>) ((BasicDBObject) coll.findOne()).get("tags");
+		return (ArrayList<String>) ((BasicDBObject) coll.findOne()).get("tags");
+	}
+	public static String getTagList(String time) throws UnknownHostException {
+		ArrayList<String> names = getTagArrayList(time);
 		
 		Gson gson = new Gson();
 		return gson.toJson(names);
 	}
 	
-	public static void tagLocationInfo(String tweetsName, String tagInfoName, String topTagName) throws UnknownHostException {
+	public static void tagLocationInfo(String tweetsName, String tagInfoName, String topTagName, String tagListName) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
 		DBCollection coll = db.getCollection(topTagName);
 		DBCollection tweets = db.getCollection(tweetsName);
-		
+		DBCollection list = db.getCollection(tagListName);
 		DBCollection hashTagInfo = db.createCollection(tagInfoName, null);
-		
+		ArrayList<String> names = new ArrayList<String>();
 		int tagCount = 0;
 		boolean relevant;
 		DBCursor dbC = coll.find();
@@ -130,7 +253,7 @@ public class HashTag {
 		SocialFactors tagFactors;
 		
 		while (dbC.hasNext() && tagCount < 100) {
-			
+			System.out.println(dbC.size());
 			BasicDBObject hashTag = (BasicDBObject) dbC.next();
 			BasicDBObject query = new BasicDBObject();
 			BasicDBObject places = new BasicDBObject();
@@ -209,11 +332,17 @@ public class HashTag {
 				System.out.println(tagFactors.getDBObject());
 				hashTagInfo.insert(tagFactors.getDBObject());
 				tagCount++;
+				names.add(hashTag.getString("hashtag"));
 				System.out.println(tagCount);
 				relevant = false;
 			}
 		}
-		
+		BasicDBObject tag = new BasicDBObject();
+		tag.put("tags", names);
+		list.drop();
+		list = db.getCollection(tagListName);
+		list.insert(tag);
+		mongoClient.close();
 	}
 	
 

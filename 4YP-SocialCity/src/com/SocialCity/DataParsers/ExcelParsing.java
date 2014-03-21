@@ -232,7 +232,7 @@ public class ExcelParsing {
 				sF= new SocialFactors (collWard.get(4).findOne(query));
 			}
 			
-			housePrice = (sheet.getCell(26,i).getContents()).substring(3);
+			housePrice = (sheet.getCell(26,i).getContents()).substring(1);
             housePrice = housePrice.replace(",", "");
             sF.setHousePrice(Double.parseDouble(housePrice));
             

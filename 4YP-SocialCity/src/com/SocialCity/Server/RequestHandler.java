@@ -173,6 +173,30 @@ public class RequestHandler extends AbstractHandler {
 					reply = rM.getSentiment(paths[2], time, "deviceSentiment");
 					response.getWriter().println(reply);
 					break;
+				case "areaFactors": 
+					if (paths.length > 3) {
+						year = paths[3];
+					}
+					reply = rM.getAreaFactors(paths[2], year);
+					response.getWriter().println(reply);
+					break;
+				case "areaTags": 
+					if (paths.length > 3) {
+						time = paths[3];
+					}
+					
+					reply = rM.getAreaTags(paths[2], time);
+					response.getWriter().println(reply);
+					break;
+				case "areaDevices": 
+					if (paths.length > 3) {
+						time = paths[3];
+					}
+					
+					reply = rM.getAreaDevices(paths[2], time);
+					response.getWriter().println(reply);
+					break;
+				
 				default: throw new Exception();
 				
 			}
@@ -185,31 +209,11 @@ public class RequestHandler extends AbstractHandler {
 	public static void main(String[] args) throws Exception
 	{
 		rM = new ResponseMaker();
-		//rM.getDeviceFactors("foursquare");
 		Server server = new Server(9113);
 		server.setHandler(new RequestHandler());
 		
 		server.start();
 		server.join();
-	//	AreaWordsMaker.areaSentiment("tweets", "bitches");
-		//new TweetByArea().deviceFactors("tweets", "test", "testy", "supertest" );
-		//AreaWordsMaker.createDatabase("tweets", "wordsInfo");
-		//new ExcelParsing().parse();
-		//Updaters.update("tweets");
-		//System.out.println(HashTag.getTagList());
-		//System.out.println(new TweetByArea().reTweets());
-		//new TweetByArea().deviceBreakdown();
-		//new TweetByArea().deviceFactors();
-		/*BasicDBObject query = new BasicDBObject("source", "<a href=\"http://www.handmark.com\" rel=\"nofollow\">TweetCaster for iOS</a>");
-		MongoClient mongoClient = new MongoClient("localhost");
-		DB db2 = mongoClient.getDB( "deviceBreakdown" );
-		DBCollection deviceStore = db2.getCollection("deviceFactors");
-		
-		DBCursor result = deviceStore.find();
-		
-		while (result.hasNext()){
-			System.out.println(result.next());
-		}*/
 	
 	}
 }

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.SocialCity.Area.BoundaryMap;
+import com.SocialCity.Area.CodeNameMap;
 import com.SocialCity.DataParsers.CollectionReader;
 import com.SocialCity.SocialFactor.AreaWords;
 import com.SocialCity.SocialFactor.SocialFactors;
@@ -500,5 +501,63 @@ public class ResponseMaker {
 		
 		return gson.toJson(result);
 	}
+
+	public String getAreaFactors(String code, String year) throws UnknownHostException {
+		MongoClient mongoClient = new MongoClient("localhost");
+		DBCollection coll;
+		//mongoClient.dropDatabase("areas");
+		DB db = mongoClient.getDB( "areas" );
+		BasicDBObject query = new BasicDBObject("locations", new BasicDBObject("ward0", code));
+		
+		if (!year.equals("2008")&&!year.equals("2009")&&!year.equals("2010")&&!year.equals("2011")&&!year.equals("2012")) {
+			year = "2012";
+		}
+		
+		if (code.length() > 4){//get ward info
+			coll = db.getCollection("wards" + year);
+		}
+		else {//get borough info
+			coll = db.getCollection("boroughs" + year);
+		}
+		
+		SocialFactors sF = new SocialFactors(coll.findOne(query));
+		
+		return new Gson().toJson(sF);
+	}
+
+	public String getAreaTags(String code, String time) throws UnknownHostException {
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "tweetInfo" );
+		DBCollection coll ;
+		Gson gson = new Gson();
+		
+		if (time == null) {
+			coll = db.getCollection(new CollectionReader().returnName("areaHashtags"));
+		}
+		else {
+			coll = db.getCollection("areaHashtags_"+time);
+		}
+		
+		BasicDBObject query = new BasicDBObject("code", code);
+		return gson.toJson(coll.find(query).next().toString());
+	}
+
+	public String getAreaDevices(String code, String time) throws UnknownHostException {
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "tweetInfo" );
+		DBCollection coll ;
+		Gson gson = new Gson();
+		
+		if (time == null) {
+			coll = db.getCollection(new CollectionReader().returnName("areaDevices"));
+		}
+		else {
+			coll = db.getCollection("areaDevices_"+time);
+		}
+		
+		BasicDBObject query = new BasicDBObject("code", code);
+		return gson.toJson(coll.find(query).next().toString());
+	}
+
 
 }

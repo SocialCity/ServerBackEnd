@@ -364,7 +364,7 @@ public class TweetByArea {
 		
 	}
 	
-	public String formatDeviceName(String source) {
+	public static String formatDeviceName(String source) {
 		if (!source.equals("web")) {
 			source = source.substring(0, source.length() - 4);
 			source = source.substring(source.lastIndexOf(">")+1);

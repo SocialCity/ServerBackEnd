@@ -3,6 +3,8 @@ package com.SocialCity.TwitterAnalysis;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -207,6 +209,44 @@ public class HashTag {
 		
 
 	}
+	public static void areaHashtag(String dbName, String tweetsName) throws UnknownHostException {
+		MongoClient mongoClient;
+		mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "tweetInfo" );
+		DBCollection coll = db.createCollection(dbName, null);
+		DBCollection tweets = db.getCollection(tweetsName);
+		CodeNameMap cnm = new CodeNameMap();
+		Set<String> codes = cnm.getBoroughCodes();
+		BasicDBObject query = new BasicDBObject();
+		HashSet<String> tags;
+		String locale;
+
+		BasicDBObject dbo;
+		
+		for (String s : codes) {
+			locale = cnm.getName(s);
+		//	query.put("text",new BasicDBObject("$regex", String.format(".*((?i)%s).*", "#"+s)));
+			query.put("place.name", locale);
+			DBCursor dbC = tweets.find(query);
+			
+			tags = new HashSet<String>();
+			System.out.println(dbC.size());
+			while (dbC.hasNext()){
+				String text = (String) (dbC.next().get("text"));
+				Pattern MY_PATTERN = Pattern.compile("#(\\w+)");
+				Matcher mat = MY_PATTERN.matcher(text);
+				
+				while (mat.find()) {
+					tags.add(mat.group(1).toLowerCase());
+				}
+			}
+			dbo = new BasicDBObject();
+			dbo.put("code", s);
+			dbo.put("hashtags", tags);
+			System.out.println(dbo.toString());
+			coll.insert(dbo);
+		}
+	}
 	
 	public static ArrayList<String> getTagArrayList(String time) throws UnknownHostException {
 		MongoClient mongoClient;
@@ -343,6 +383,43 @@ public class HashTag {
 		list = db.getCollection(tagListName);
 		list.insert(tag);
 		mongoClient.close();
+	}
+
+	public static void areaDevices(String areaDevices, String tweetName) throws UnknownHostException {
+		MongoClient mongoClient = new MongoClient("localhost");
+		DB db = mongoClient.getDB( "tweetInfo" );
+		DBCollection coll = db.createCollection(areaDevices, null);
+		DBCollection tweets = db.getCollection(tweetName);
+		BasicDBObject dbo;
+		BasicDBObject query = new BasicDBObject();
+		HashSet<String> devices;
+		String locale;
+		String source;
+		
+		CodeNameMap cnm = new CodeNameMap();
+		Set<String> codes = cnm.getBoroughCodes();
+		
+		for (String s : codes) {
+			locale = cnm.getName(s);
+			query.put("place.name", locale);
+			DBCursor dbC = tweets.find(query);
+			devices = new HashSet<String>();
+			while (dbC.hasNext()) {
+				dbo = (BasicDBObject) dbC.next();
+				source = (String)dbo.get("source");
+				if (!source.equals("web")) {
+					source = TweetByArea.formatDeviceName(source);
+					//System.out.println(source);
+				}
+				devices.add(source);
+			}
+		
+			dbo = new BasicDBObject();
+			dbo.put("code", s);
+			dbo.put("devices", devices);
+			System.out.println(dbo.toString());
+			coll.insert(dbo);
+		}
 	}
 	
 

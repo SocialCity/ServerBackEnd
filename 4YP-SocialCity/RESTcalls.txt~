@@ -7,13 +7,16 @@ http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(true)OrBorough
 
 **Restcall used to retrieve social factors for the wards or boroughs, which can be combined based on factorNumber1. factorNumber2 is the main factor you are interested in seeing how it is affected by factorNumber1. Final flag allows entire object, or just factors requested, to be returned. '/year' is optional and can be the following values: 2008.2009, 2010, 2011, 2012. Leaving blank will result in 2012 being used.**
 
+-http://localhost:8080/areaFactors/code/year
+**Will return the factors for a single area, with areacode code. Year is optional, leaving it blank will retrieve 2012.  **
+
 -http://localhost:8080/timestamps
 
 **TIME IS AN OPTIONAL PARAMETER FOR ALL FOLLOWING CALLS. USE ABOVE CALL TO GET ALL POSSIBLE VALUES THAT CAN BE USED FOR TIME OPTION. IF TIME IS LEFT BLANK MOST RECENT DATABASE WILL BE USED.**
 
--http://localhost:8080/hashTagFactors/tag1/tag2/time
+-http://localhost:8080/hashTagFactors/tag1/
 
-**Returns social factor objects for two different hash tags. Pass hashtags as strings.**
+**Returns social factor objects for a hash tag Pass hashtags as strings.**
 
 -http://localhost:8080/hashTagList/time
 
@@ -35,6 +38,27 @@ http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(true)OrBorough
 
 **returns all factors availble and the factorNumber to be used**
 
+http://localhost:8080/areaSentiment/boroughCode
+http://localhost:8080/hashtagSentiment/tag
+http://localhost:8080/deviceSentiment/device
+
+**Returns the average sentiment values (pleasantness, activation, imagery, DAL score) for the given borough code/tag/device **
+
+http://localhost:8080/areaWords/wordCodeNum/boroughCode
+http://localhost:8080/hashtagWords/wordCodeNum/tag
+http://localhost:8080/deviceWords/wordCodeNum/device
+
+**Returns the words associated with a particular borough code/tag/device. wordCodeNum refers to the words that are returned, according to this key:
+	0 - all
+	1 - nouns
+	2 - adjectives
+	3 - verbs
+	4 - DAL words **
+
+http://localhost:8080/areaTags/code
+http://localhost:8080/areaDevices/code
+
+**Returns the hash tags/ devices for a borough with borough code equal to code. **
 
 FACTOR NUMBERS:
 

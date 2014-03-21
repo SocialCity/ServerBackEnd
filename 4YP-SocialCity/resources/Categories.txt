@@ -1,0 +1,21 @@
+#this file contains the categories that words will be matched to in the twitter analyser
+#The category name is indicated with a $ symbol, and the matched words are a comma separated list following a !
+#The name of the category IS NOT added to the list of words used to match in the twitter analysis
+$crime
+!crime,fraud,offense,cybercrime,felony,theft,steal,stealing,stolen,rape,pedophile
+$employment
+!employment,job,money,earning
+$health
+!health,hospital,death,ambulance
+$Boris_Johnson
+!Boris,Johnson,Mayor
+$travel
+travel,commute,tube,bus,drive,car,dlr,plane
+$drugs
+!drugs,coke,weed,spliff,joint,high,heroine,smack,dope,lsd,acid,meth
+$media
+!tv,film,book,show,media,music,album,dvd,bluray,cinema
+$asoiaf
+!game of thrones,starks,lannister,hbo,grrm
+$terrorism
+!terrorist,threat,bomb,explosion

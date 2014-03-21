@@ -52,6 +52,8 @@ public class Updaters {
 		String areaSentiment = "areaSentiment_" + date.toString();
 		String hashSentiment = "hashtagSentiment_" + date.toString();
 		String hashWordName = "hashtagWords_" + date.toString();
+		String areaTags = "areaHashtags_" + date.toString();
+		String areaDevices = "areaDevices_" + date.toString();
 		
 		HashTag.topHashTags(tweetName,hashTagName,topTagsName,tagListName); 
 		HashTag.tagLocationInfo(tweetName, tagInfoName, topTagsName, tagListName);
@@ -62,6 +64,9 @@ public class Updaters {
 		AreaWordsMaker.createDatabase(tweetName, wordsName);
 		AreaWordsMaker.areaSentiment(tweetName, areaSentiment);
 		HashTag.hashtagWords(tweetName, hashSentiment, hashWordName, date.toString());
+		HashTag.areaHashtag(areaTags, tweetName);
+		HashTag.areaDevices(areaDevices, tweetName);
+		
 		System.out.println("out?");
 		try {
 			CollectionReader.editName("hashtag", hashTagName);
@@ -78,6 +83,8 @@ public class Updaters {
 			CollectionReader.editName("areaSentiment", areaSentiment);
 			CollectionReader.editName("hashtagSentiment", hashSentiment);
 			CollectionReader.editName("hashtagWords", hashWordName);
+			CollectionReader.editName("areaHashtags", areaTags);
+			CollectionReader.editName("areaDevices", areaDevices);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -92,7 +99,7 @@ public class Updaters {
 	}
 	public static void main(String[] args) throws Exception
 	{
-		update("tweets");
+		update(args[0]);
 	}
 
 }

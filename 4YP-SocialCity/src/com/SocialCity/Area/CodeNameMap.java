@@ -52,6 +52,8 @@ public class CodeNameMap {
 		return returnSet;
 	}
 	
+	//creates map that places either codes as key and names as values or vice versa
+	//code boolean decides order - true for code to be key, false for other way around
 	private HashMap<String, String> getBaseMap(boolean code) {
 		String boroughFile = "resources/BoroughsToCodes.txt";
 		String wardFile = "resources/WardsToCodes.txt";
@@ -88,6 +90,7 @@ public class CodeNameMap {
 		}
 	}
 	
+	//fills up map as needed
 	private void fillMap (String filePath,HashMap<String, String> map, boolean code) throws IOException {
 		String line = "";
 		String cvsSplitBy = ",";

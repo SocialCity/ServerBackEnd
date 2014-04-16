@@ -50,8 +50,8 @@ public class AreaWordsMaker {
 		
 		int i = 0;
 		
+		//create initial word objects for each area
 		for (String s : codes) {
-			System.out.println(s);
 			name = cnm.getName(s);
 			
 			query = new BasicDBObject("place.name", name);
@@ -64,7 +64,7 @@ public class AreaWordsMaker {
 				tw_list.add(new Tweet_Obj(text));
 			}
 			
-			System.out.println(tw_list.size());
+			//tweets analysed
 			resultBlock = ta.analyse_tweets(tw_list);
 			
 			adj = resultBlock.get_adjective_stats_freqsorted();
@@ -79,6 +79,7 @@ public class AreaWordsMaker {
 			catsW = new ArrayList<Word>();
 			aW = new AreaWords(s);
 			
+			//each word type has only top ten words stored
 			while (i < 10 && i < adj.size()) {
 				adjW.add(new Word(adj.get(i)));
 				i++;
@@ -121,9 +122,10 @@ public class AreaWordsMaker {
 			
 			wordStore.insert(aW.getDBObject());
 		}
-		
+		mongoClient.close();
 	}
 	
+	//creates average area sentiment scores for objects
 	public static void areaSentiment(String tweets, String areaSentiment) throws UnknownHostException {
 		CodeNameMap cnm = new CodeNameMap();
 		Set<String> codes = cnm.getBoroughCodes();
@@ -164,15 +166,17 @@ public class AreaWordsMaker {
 			act = resultBlock.get_mean_activity();
 			image = resultBlock.get_mean_imagery();
 			valience = resultBlock.get_mean_valience();
+			double frequency = tw_list.size();
 			
 			map = new BasicDBObject ();
 			map.put("code", s);
 			map.put("activation", act);
 			map.put("imagery", image);
 			map.put("pleasantness", valience);
+			map.put("frequency", frequency);
 			
 			newColl.insert(map);
 		}
-		
+		mongoClient.close();
 	}
 }

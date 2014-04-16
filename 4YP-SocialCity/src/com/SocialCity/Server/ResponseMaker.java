@@ -125,7 +125,7 @@ public class ResponseMaker {
 					tempChecked.clear();
 				}
 			}
-		
+			mongoClient.close();
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -134,6 +134,7 @@ public class ResponseMaker {
 		return listOfData;
 	}
 	
+	//filter social factors lists to return only single factor
 	private ArrayList<HashMap<String, Object>> singleFactorOnly (ArrayList<SocialFactors> listOfData, int factorNumber) {
 		ArrayList<HashMap<String, Object>> newList = new ArrayList<HashMap<String, Object>>();
 		HashMap<String, Object> currentEntry;
@@ -148,6 +149,7 @@ public class ResponseMaker {
 		return newList;	
 	}
 	
+	//filter social factors list to return only 2 factors, one used for combination and the other for comparison
 	private ArrayList<HashMap<String, Object>> twoFactorsOnly(ArrayList<SocialFactors> listOfData, int factorNumber1, int factorNumber2) {
 		ArrayList<HashMap<String, Object>> newList = new ArrayList<HashMap<String, Object>>();
 		HashMap<String, Object> currentEntry;
@@ -252,6 +254,7 @@ public class ResponseMaker {
 		return combined;
 	}
 
+	//get the social factors for a hash tag
 	public String hashTags(String tag1, String time) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
@@ -271,13 +274,16 @@ public class ResponseMaker {
 		listOfData.add(tag1Factors);
 		
 		Gson gson = new Gson();
+		mongoClient.close();
 		return gson.toJson(listOfData);
 	}
 
+	//return all hash tags lists
 	public String hashTagList(String time) throws UnknownHostException {
 			return HashTag.getTagList(time);
 	}
 
+	//return proportions of devices for a chosen borough
 	public String devicesForBorough(String code, String time) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "deviceBreakdown" );
@@ -293,10 +299,12 @@ public class ResponseMaker {
 		Gson gson = new Gson();
 		
 		BasicDBObject query = new BasicDBObject("borough", code);
-		
-		return gson.toJson(coll.find(query).next().toString());
+		String ret = gson.toJson(coll.find(query).next().toString());
+		mongoClient.close();
+		return ret;
 	}
-
+	
+	//get all devices stored in time stamp
 	public String getDevice(String time) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "deviceBreakdown" );
@@ -310,9 +318,13 @@ public class ResponseMaker {
 		}
 		
 		Gson gson = new Gson();
-		return gson.toJson(coll.findOne().get("list"));
+		String ret = gson.toJson(coll.findOne().get("list"));
+		mongoClient.close();
+	
+		return ret;
 	}
 
+	//get social factors for a device
 	public String getDeviceFactors(String deviceName, String time) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "deviceBreakdown" );
@@ -328,9 +340,12 @@ public class ResponseMaker {
 		BasicDBObject query = new BasicDBObject("locations", new BasicDBObject("ward0", deviceName));
 		
 		Gson gson = new Gson();
-		return gson.toJson(coll.find(query).next().toString());
+		String ret = gson.toJson(coll.find(query).next().toString());
+		mongoClient.close();
+		return ret;
 	}
 
+	//return explanation of factor names
 	public String getFactorList() {
 		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 		
@@ -398,6 +413,7 @@ public class ResponseMaker {
 		return gson.toJson(list);
 	}
 
+	//get all time stamps within database
 	public String getTimes() throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "updates" );
@@ -415,9 +431,11 @@ public class ResponseMaker {
 		}
 		
 		Gson gson = new Gson();
+		mongoClient.close();
 		return gson.toJson(list);
 	}
 	
+	//return the sentiment scores for a given area, tag or device
 	public String getSentiment(String code, String time, String collection)throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
@@ -437,17 +455,19 @@ public class ResponseMaker {
 		
 		DBCursor dbc = coll.find(query);
 
-		System.out.println(coll.find().next());
+		//System.out.println(coll.find().next());
 		BasicDBObject dbo = (BasicDBObject) dbc.next();
 		
 		map.put("code", dbo.get("code"));
 		map.put("activation", dbo.get("activation"));
 		map.put("imagery", dbo.get("imagery"));
 		map.put("pleasantness", dbo.get("pleasantness"));
-		
+		map.put("frequency", dbo.get("frequency"));
+		mongoClient.close();
 		return gson.toJson(map);
 	}
 	
+	//get the word lists and their sentiment for given area, tag or device
 	public String getWords(int wordCode, String code, String time, String collection) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
@@ -498,14 +518,14 @@ public class ResponseMaker {
 			break;
 		}
 		
-		
+		mongoClient.close();
 		return gson.toJson(result);
 	}
 
+	//return social factors for a single area
 	public String getAreaFactors(String code, String year) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DBCollection coll;
-		//mongoClient.dropDatabase("areas");
 		DB db = mongoClient.getDB( "areas" );
 		BasicDBObject query = new BasicDBObject("locations", new BasicDBObject("ward0", code));
 		
@@ -521,10 +541,10 @@ public class ResponseMaker {
 		}
 		
 		SocialFactors sF = new SocialFactors(coll.findOne(query));
-		
+		mongoClient.close();
 		return new Gson().toJson(sF);
 	}
-
+	//get a hashtag list for an area
 	public String getAreaTags(String code, String time) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
@@ -539,9 +559,11 @@ public class ResponseMaker {
 		}
 		
 		BasicDBObject query = new BasicDBObject("code", code);
-		return gson.toJson(coll.find(query).next().toString());
+		String ret = gson.toJson(coll.find(query).next().toString());
+		mongoClient.close();
+		return ret;
 	}
-
+	//get a device list for every area without the proportions
 	public String getAreaDevices(String code, String time) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
@@ -556,7 +578,9 @@ public class ResponseMaker {
 		}
 		
 		BasicDBObject query = new BasicDBObject("code", code);
-		return gson.toJson(coll.find(query).next().toString());
+		String ret = gson.toJson(coll.find(query).next().toString());
+		mongoClient.close();
+		return ret;
 	}
 
 

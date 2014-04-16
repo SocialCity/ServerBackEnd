@@ -27,6 +27,7 @@ public class HashTag {
 	
 	public HashTag(){}
 	
+	//top hash tags found and stored
 	public static void topHashTags(String tweetsName, String hashTagName, String topTagsName, String tagListName) throws UnknownHostException{
 		HashMap<String, Integer> tagMap = new HashMap<String, Integer> ();
 		int count;
@@ -43,6 +44,7 @@ public class HashTag {
 		query.put("text",new BasicDBObject("$regex", String.format(".*((?i)%s).*", "#")));
 		DBCursor dbC = coll.find(query);
 		
+		//use string pattern to filter hash tags out of tweets and store their frequency
 		while (dbC.hasNext()) {
 			String text = (String) (dbC.next().get("text"));
 			Pattern MY_PATTERN = Pattern.compile("#(\\w+)");
@@ -58,12 +60,9 @@ public class HashTag {
 			}
 		}
 		
-		for (String k : tagMap.keySet()) {
-			System.out.println(k + "  " + tagMap.get(k));
-		}
-		
 		coll = db.createCollection(hashTagName, null);
 		
+		//place tag and count into object for database storing
 		for (String k : tagMap.keySet()) {
 			dbo = new BasicDBObject();
 			dbo.put("hashtag", k);
@@ -72,8 +71,7 @@ public class HashTag {
 		}
 		
 		dbC = coll.find().sort(new BasicDBObject("count", -1));
-		
-		
+		//sort collection
 		sortedColl = db.createCollection(topTagsName, null);
 		tagList = db.createCollection(tagListName, null);
 		
@@ -83,7 +81,6 @@ public class HashTag {
 			tag = (BasicDBObject) dbC.next();
 			sortedColl.insert(tag);
 			names.add(tag.getString("hashtag"));
-			System.out.println("name size is : " + names.size());
 		}
 		
 		tag = new BasicDBObject();
@@ -92,6 +89,7 @@ public class HashTag {
 		mongoClient.close();
 	} 
 	
+	//create word lists and sentiment score for hash tags
 	public static void hashtagWords(String tweetsName, String hashSentiment, String wordName, String time) throws UnknownHostException {
 		ArrayList<String> tagList = getTagArrayList(time);
 		BasicDBObject query;
@@ -123,15 +121,18 @@ public class HashTag {
 		AreaWords aW;
 		DBCollection wordStore = db.getCollection(wordName);
 		int counter = 0;
+		
+		//go through each hash tag in database
 		for (String s: tagList) {
-			System.out.println(counter);
 			counter++;
 			query = new BasicDBObject();
+			//find all tweets containing that hash tag
 			query.put("text",new BasicDBObject("$regex", String.format(".*((?i)%s).*", "#"+s)));
 			DBCursor dbC = coll.find(query);
 			
 			tw_list = new ArrayList<Tweet_Obj>();
 			
+			//create text list for tweet analysis
 			while (dbC.hasNext()) {
 				dbo = (BasicDBObject) dbC.next();
 				text =  dbo.getString("text");
@@ -143,13 +144,14 @@ public class HashTag {
 			act = resultBlock.get_mean_activity();
 			image = resultBlock.get_mean_imagery();
 			valience = resultBlock.get_mean_valience();
-			
+			double frequency = tw_list.size();
+			//store average scores for a hash tag
 			map = new BasicDBObject ();
 			map.put("code", s);
 			map.put("activation", act);
 			map.put("imagery", image);
 			map.put("pleasantness", valience);
-			
+			map.put("frequency", frequency);
 			newColl.insert(map);
 			
 			adj = resultBlock.get_adjective_stats_freqsorted();
@@ -157,7 +159,7 @@ public class HashTag {
 			verb = resultBlock.get_verb_stats_freqsorted();
 			dal = resultBlock.get_DAL_stats_freqsorted();
 			cats = resultBlock.get_Category_stats_freqsorted();
-			System.out.println("Categories");
+		//	create lists of each word category for the hash tag and store it in the database
 			aW = new AreaWords(s);
 			adjW = new ArrayList<Word>();
 			nounW = new ArrayList<Word>();
@@ -207,8 +209,10 @@ public class HashTag {
 			
 		}
 		
-
+		mongoClient.close();
 	}
+	
+	//for an area create the list of all hashtags for that area
 	public static void areaHashtag(String dbName, String tweetsName) throws UnknownHostException {
 		MongoClient mongoClient;
 		mongoClient = new MongoClient("localhost");
@@ -225,12 +229,10 @@ public class HashTag {
 		
 		for (String s : codes) {
 			locale = cnm.getName(s);
-		//	query.put("text",new BasicDBObject("$regex", String.format(".*((?i)%s).*", "#"+s)));
 			query.put("place.name", locale);
 			DBCursor dbC = tweets.find(query);
 			
 			tags = new HashSet<String>();
-			System.out.println(dbC.size());
 			while (dbC.hasNext()){
 				String text = (String) (dbC.next().get("text"));
 				Pattern MY_PATTERN = Pattern.compile("#(\\w+)");
@@ -243,28 +245,29 @@ public class HashTag {
 			dbo = new BasicDBObject();
 			dbo.put("code", s);
 			dbo.put("hashtags", tags);
-			System.out.println(dbo.toString());
 			coll.insert(dbo);
 		}
+		mongoClient.close();
 	}
-	
+	//return the list of top 100 hash tags for user request
 	public static ArrayList<String> getTagArrayList(String time) throws UnknownHostException {
 		MongoClient mongoClient;
 		mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
 		DBCollection coll;
-		
-		System.out.println(time);
+
 		if (time == null) {
-			System.out.println("yeeeah");
 			coll = db.getCollection(CollectionReader.returnName("tagList"));
 		}
 		else {
 			coll = db.getCollection("tagList_" + time);
 		}
 		
-		return (ArrayList<String>) ((BasicDBObject) coll.findOne()).get("tags");
+		ArrayList<String> ret = (ArrayList<String>)((BasicDBObject) coll.findOne()).get("tags");
+		mongoClient.close();
+		return ret;
 	}
+	//calls list creator function to return
 	public static String getTagList(String time) throws UnknownHostException {
 		ArrayList<String> names = getTagArrayList(time);
 		
@@ -272,6 +275,7 @@ public class HashTag {
 		return gson.toJson(names);
 	}
 	
+	//create weighted average of tag social factors
 	public static void tagLocationInfo(String tweetsName, String tagInfoName, String topTagName, String tagListName) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
@@ -292,8 +296,8 @@ public class HashTag {
 		SocialFactors boroughFactors;
 		SocialFactors tagFactors;
 		
+		//get count of locations for each tag and create social factors
 		while (dbC.hasNext() && tagCount < 100) {
-			System.out.println(dbC.size());
 			BasicDBObject hashTag = (BasicDBObject) dbC.next();
 			BasicDBObject query = new BasicDBObject();
 			BasicDBObject places = new BasicDBObject();
@@ -303,8 +307,6 @@ public class HashTag {
 			int total=0;
 			tagFactors = new SocialFactors(hashTag.getString("hashtag"));
 			placeRatio = new HashMap<String, Integer>();
-			System.out.println("----------");
-			System.out.println(hashTag.getString("hashtag"));
 			
 			while (results.hasNext()){
 				places = (BasicDBObject)results.next().get("place");
@@ -318,7 +320,6 @@ public class HashTag {
 				placeRatio.put(placeName, count);
 				
 			}
-			//System.out.println(placeRatio);
 			double crimeRate = 0;
 			double housePrice = 0;
 			double GCSEScore = 0;
@@ -331,6 +332,7 @@ public class HashTag {
 			double fires = 0;
 			
 			relevant = false;
+			//weight social factors based on count for each location
 			for (String k : placeRatio.keySet()) {
 				
 				if (cnm.getCode(k) != null) {
@@ -350,13 +352,9 @@ public class HashTag {
 					fires = fires + (boroughFactors.getDeliberateFires()*count);
 					
 					total=total+count;
-					//System.out.println(k);
-					//System.out.println(count);
-					//System.out.println(total);
-					//System.out.println(boroughFactors.getDBObject());
 				}
 			}
-			
+			//average social factor information
 			if (relevant) {
 				tagFactors.setCrimeRate(crimeRate/total);
 				tagFactors.setGCSEScore(GCSEScore/total);
@@ -369,11 +367,9 @@ public class HashTag {
 				tagFactors.setChildInNoWorkHouse(childInNoWork/total);
 				tagFactors.setDeliberateFires(fires/total);
 				
-				System.out.println(tagFactors.getDBObject());
 				hashTagInfo.insert(tagFactors.getDBObject());
 				tagCount++;
 				names.add(hashTag.getString("hashtag"));
-				System.out.println(tagCount);
 				relevant = false;
 			}
 		}
@@ -384,7 +380,7 @@ public class HashTag {
 		list.insert(tag);
 		mongoClient.close();
 	}
-
+	//for each area create list of devices without proportions
 	public static void areaDevices(String areaDevices, String tweetName) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
@@ -409,7 +405,6 @@ public class HashTag {
 				source = (String)dbo.get("source");
 				if (!source.equals("web")) {
 					source = TweetByArea.formatDeviceName(source);
-					//System.out.println(source);
 				}
 				devices.add(source);
 			}
@@ -417,9 +412,9 @@ public class HashTag {
 			dbo = new BasicDBObject();
 			dbo.put("code", s);
 			dbo.put("devices", devices);
-			System.out.println(dbo.toString());
 			coll.insert(dbo);
 		}
+		mongoClient.close();
 	}
 	
 

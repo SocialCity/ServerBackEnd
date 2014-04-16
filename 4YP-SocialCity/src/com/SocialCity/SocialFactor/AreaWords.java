@@ -1,19 +1,7 @@
 package com.SocialCity.SocialFactor;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.SocialCity.Area.CodeNameMap;
-import com.SocialCity.TwitterAnalysis.Tweet_Info_Bloc;
-import com.SocialCity.TwitterAnalysis.Tweet_Obj;
-import com.SocialCity.TwitterAnalysis.TwitterAnalyser;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.MongoClient;
 
 public class AreaWords{
 
@@ -33,6 +21,7 @@ public class AreaWords{
 		Cats = new ArrayList<Word>();
 	}
 	
+	//uses a DBObject to create an AreaWords object
 	public AreaWords (BasicDBObject dbo) {
 		BasicDBObject dbo2;
 		BasicDBObject dbo3;
@@ -47,7 +36,7 @@ public class AreaWords{
 		
 		int i = 0;
 		dbo2 = (BasicDBObject) dbo.get("nouns");
-		//System.out.println("nouns");
+		//words stored in nested dbo objects, so values need to be extracted
 		while (!(dbo2.get("word"+i) == null)){
 			dbo3 = (BasicDBObject) dbo2.get("word" + i);
 			word = new Word(dbo3.getString("word"), dbo3.getDouble("frequency"), dbo3.getDouble("pleasantness"), dbo3.getDouble("activation"), dbo3.getDouble("imagery"));
@@ -57,7 +46,7 @@ public class AreaWords{
 		
 		i = 0;
 		dbo2 = (BasicDBObject) dbo.get("adjectives");
-		//System.out.println("adjective");
+
 		while (!(dbo2.get("word"+i) == null)){
 			dbo3 = (BasicDBObject) dbo2.get("word" + i);
 			word = new Word(dbo3.getString("word"), dbo3.getDouble("frequency"), dbo3.getDouble("pleasantness"), dbo3.getDouble("activation"), dbo3.getDouble("imagery"));
@@ -67,7 +56,7 @@ public class AreaWords{
 		
 		i = 0;
 		dbo2 = (BasicDBObject) dbo.get("verb");
-		//System.out.println("verb");
+
 		while (!(dbo2.get("word"+i) == null)){
 			dbo3 = (BasicDBObject) dbo2.get("word" + i);
 			word = new Word(dbo3.getString("word"), dbo3.getDouble("frequency"), dbo3.getDouble("pleasantness"), dbo3.getDouble("activation"), dbo3.getDouble("imagery"));
@@ -77,7 +66,7 @@ public class AreaWords{
 		
 		i = 0;
 		dbo2 = (BasicDBObject) dbo.get("DAL");
-		//System.out.println("DAL");
+
 		while (!(dbo2.get("word"+i) == null)){
 			dbo3 = (BasicDBObject) dbo2.get("word" + i);
 			word = new Word(dbo3.getString("word"), dbo3.getDouble("frequency"), dbo3.getDouble("pleasantness"), dbo3.getDouble("activation"), dbo3.getDouble("imagery"));
@@ -87,15 +76,11 @@ public class AreaWords{
 		
 		i = 0;
 		dbo2 = (BasicDBObject) dbo.get("Catagories");
-		//System.out.println("DAL");
+
 		while (!(dbo2.get("word"+i) == null)){
-			
 			dbo3 = (BasicDBObject) dbo2.get("word" + i);
-			
 			word = new Word(dbo3.getString("word"), dbo3.getDouble("frequency"), dbo3.getDouble("pleasantness"), dbo3.getDouble("activation"), dbo3.getDouble("imagery"));
-			
 			Cats.add(word);
-			//System.out.println("Catagories");
 			i++;
 		}
 		
@@ -138,6 +123,7 @@ public class AreaWords{
 		Cats = dAL;
 	}
 	
+	//creates the DB object that is represents this object
 	public BasicDBObject getDBObject() {
 		BasicDBObject dbo = new BasicDBObject();
 		BasicDBObject sub;

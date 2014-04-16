@@ -184,10 +184,11 @@ public class ExcelParsing {
 		collWard.get(2).insert(sF.get(2).getDBObject());
 		collWard.get(3).insert(sF.get(3).getDBObject());
 		collWard.get(4).insert(sF.get(4).getDBObject());
+		mongoClient.close();
 
 	}
 	private void housePricesSet() {
-		MongoClient mongoClient;
+		MongoClient mongoClient = null;
 		Sheet sheet = null;
 		ArrayList<DBCollection> collWard = new ArrayList<DBCollection>();
 		ArrayList<DBCollection> collBorough = new ArrayList<DBCollection>();
@@ -308,7 +309,9 @@ public class ExcelParsing {
 				sF.setHousePrice(cost);
 				collWard.get(i).update(dbo, sF.getDBObject());
 			}
+			
 		}
+		mongoClient.close();
 
 	}
 	

@@ -22,22 +22,26 @@ public class Updaters {
 	 */
 	//VERY IMPORTANT - STOP THE TWEET COLLECTOR BEFORE YOU USE THIS.
 	public static void update(String tweetName) throws UnknownHostException {
-		
+		//get date for timestamp
 		String date= new java.util.Date().toString();
 		
 		MongoClient mongoClient;
 		mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "updates" );
 		DBCollection coll = db.getCollection("times");
+
 		DBObject dbo = new BasicDBObject();
-		
+
 		date = date.replace(" ", "_");
-		
+		date = date.replace(":", "_");
+	
 		dbo.put("date", date.toString());
 		coll.insert(dbo);
+
 		
 		TweetByArea tba = new TweetByArea();
 		
+		//creates names for each database
 		String hashTagName = "hashTag_" + date.toString();
 		String topTagsName = "topHashTags_" + date.toString();
 		String tagListName = "tagList_" + date.toString();
@@ -55,20 +59,33 @@ public class Updaters {
 		String areaTags = "areaHashtags_" + date.toString();
 		String areaDevices = "areaDevices_" + date.toString();
 		
+		//update each database
+		System.out.println("Starting update: 0/11");
 		HashTag.topHashTags(tweetName,hashTagName,topTagsName,tagListName); 
+		System.out.println("Update: 1/11");
 		HashTag.tagLocationInfo(tweetName, tagInfoName, topTagsName, tagListName);
+		System.out.println("Update: 2/11");
 		tba.tweetProportions(propName, tweetName);
+		System.out.println("Update: 3/11");
 		tba.deviceFactors(tweetName, devFacName, devSent, devWords );
+		System.out.println("Update: 4/11");
 		tba.createDeviceList(tweetName, devListName);
+		System.out.println("Update: 5/11");
 		tba.deviceBreakdown(tweetName, devForBoName);
+		System.out.println("Update: 6/11");
 		AreaWordsMaker.createDatabase(tweetName, wordsName);
+		System.out.println("Update: 7/11");
 		AreaWordsMaker.areaSentiment(tweetName, areaSentiment);
+		System.out.println("Update: 8/11");
 		HashTag.hashtagWords(tweetName, hashSentiment, hashWordName, date.toString());
+		System.out.println("Update: 9/11");
 		HashTag.areaHashtag(areaTags, tweetName);
+		System.out.println("Update: 10/11");
 		HashTag.areaDevices(areaDevices, tweetName);
+		System.out.println("Update: 11/11");
 		
-		System.out.println("out?");
 		try {
+			//collection reader files get updated
 			CollectionReader.editName("hashtag", hashTagName);
 			CollectionReader.editName("topHashTags", topTagsName);
 			CollectionReader.editName("tagList", tagListName);
@@ -89,12 +106,14 @@ public class Updaters {
 			e.printStackTrace();
 		}
 		
-		//tophashtags first
-		//tagLocationInfo second
-		//tweetProportions
-		//devicefactors
-		//createDeviceList
-		//deviceBreakdown
+		//delete tweets
+		System.out.println("Files updated. Deleting tweets...");
+		db = mongoClient.getDB( "tweetInfo" );
+		coll = db.getCollection(tweetName);
+		coll.drop();
+		mongoClient.close();
+		System.out.println("Update complete.");
+
 		
 	}
 	public static void main(String[] args) throws Exception

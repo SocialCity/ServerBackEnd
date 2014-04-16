@@ -44,6 +44,7 @@ public class SocialFactors {
 		return sF;
 	}
 	
+	//creates social factor object from dbobject
 	public SocialFactors(DBObject readIn) {
 		crimeRate = (double) readIn.get("crimeRate");
 		housePrice = (double) readIn.get("housePrice");
@@ -60,7 +61,6 @@ public class SocialFactors {
 		BasicDBObject locations = (BasicDBObject) readIn.get("locations");
 		int i = 0;
 		while (!(locations.getString("ward"+i) == null)){
-			//System.out.println(locations.getString("ward"+i) + " " + i);
 			location.add(locations.getString("ward"+i));
 			i++;
 		}
@@ -84,6 +84,7 @@ public class SocialFactors {
 		this.transportRating = transportRating;
 	}
 	
+	//can get the wanted factor value via just the number
 	public double getFactorValue(int factorNumber) {
 		switch (factorNumber) {
 		case 0: return this.crimeRate;
@@ -100,6 +101,7 @@ public class SocialFactors {
 		}
 	}
 	
+	//return factor name via just number
 	public String getFactorName(int factorNumber) {
 		switch (factorNumber) {
 		case 0: return "crimeRate";
@@ -116,6 +118,7 @@ public class SocialFactors {
 		}
 	}
 	
+	//used to combined two different social factors
 	public void combineLocations(SocialFactors factors) {
 		if (crimeRate == -1) {
 			crimeRate = factors.getCrimeRate();
@@ -187,10 +190,10 @@ public class SocialFactors {
 			deliberateFires = (deliberateFires + factors.getDeliberateFires())/2;
 		}
 		
-		//sentiment.averageSentiments(factors.getSentiment());
 		location.addAll(factors.getLocation());
 	}
 	
+	//creates a DBObject representing the object
 	public BasicDBObject getDBObject() {
 		BasicDBObject factors = new BasicDBObject();
 		BasicDBObject locations = new BasicDBObject();

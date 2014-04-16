@@ -1,7 +1,7 @@
 package com.SocialCity.SocialFactor;
 
 import com.SocialCity.TwitterAnalysis.Word_Stats;
-
+//simple object to represent words for database interaction
 public class Word {
 	private String word;
 	private double pleasantness;

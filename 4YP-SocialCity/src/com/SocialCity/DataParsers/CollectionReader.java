@@ -9,10 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class CollectionReader {
-
-	/**
-	 * @param args
-	 */
+	
+	//return name of stored in file for database use
 	public static String returnName(String collection) {
 		String line = "";
 		
@@ -29,6 +27,7 @@ public class CollectionReader {
 		return line;
 	}
 	
+	//write most recent time stamped database name to file
 	public static void editName(String collection, String newName) throws IOException {
 		File file = new File("resources/databaseNames/"+collection+".txt");
 		FileWriter fw = new FileWriter(file.getAbsoluteFile());

@@ -1,29 +1,15 @@
 package com.SocialCity.Server;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-
-import com.SocialCity.DataParsers.ExcelParsing;
-import com.SocialCity.DatabaseSwitching.Updaters;
-import com.SocialCity.SocialFactor.AreaWordsMaker;
-import com.SocialCity.TwitterAnalysis.HashTag;
-import com.SocialCity.TwitterAnalysis.TweetByArea;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 
 //Simple URL parse simulating a REST service. Following URL patterns accepted:
 	//-http://localhost:8080/oneFactor/factorNumber/booleanForUsingWards(true)OrBoroughs(false)/booleanForCombining(true for combine)/booleanForAllFactors(true returns every
@@ -59,7 +45,7 @@ public class RequestHandler extends AbstractHandler {
 		boolean all;
 		String year = "";
 		String time = null;
-		
+		//REST calls parsed and corresponding response maker method called
 		try{
 			switch (paths[1]) {
 				case "oneFactor": 
@@ -70,7 +56,7 @@ public class RequestHandler extends AbstractHandler {
 					if (paths.length > 6) {
 						year = paths[6];
 					}
-					if (factor < 0 || factor > 8) {throw new Exception();}
+					if (factor < 0 || factor > 9) {throw new Exception();}
 					reply = rM.oneFactor(factor, useWards, combine, all, year);
 					response.getWriter().println(reply);
 					break;
@@ -204,6 +190,7 @@ public class RequestHandler extends AbstractHandler {
 		catch (Exception e) {
 			response.getWriter().println("<h1>404 - There is nothing for you here</h1>");
 		}
+		
 	}
 	//Main to start server
 	public static void main(String[] args) throws Exception

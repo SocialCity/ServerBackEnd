@@ -7,16 +7,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import com.SocialCity.DataParsers.CvsParsing;
+
+import com.SocialCity.DataParsers.CsvParsing;
 import com.SocialCity.DataParsers.ExcelParsing;
 
 
 public class BoundaryMap {
+	//create boundary map for use within project
 	public static HashMap<String, ArrayList<String>>returnWardMap(boolean useWards) {
 		HashMap<String, ArrayList<String>> boundaryMap = new HashMap<String, ArrayList<String>>();
 		ArrayList<String> neighbours;
 		String fileName;
 		
+		//get wards or borough boundaries
 		if (useWards) {
 			fileName = "resources/bordersNamesCodes.txt";
 		}
@@ -24,6 +27,7 @@ public class BoundaryMap {
 			fileName = "resources/boroughsBordersNamesCodes.txt";
 		}
 		
+		//read in areas; first line after '---' is the subject, rest of names are the neighbours
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(fileName));
 			String line;
@@ -34,16 +38,12 @@ public class BoundaryMap {
 				if (newSegment) {
 					newSegment = false;
 					subject = line.replace("\n", "");
-					//System.out.println(subject);
 				}
 				else if (!line.equals("---")) {
 					neighbours.add(line.replace("\n",""));
 				}
 				else if (line.equals("---")) {
 					boundaryMap.put(subject, neighbours);
-					//System.out.println(subject);
-					//System.out.println(neighbours);
-					//System.out.println("------");
 					neighbours = new ArrayList<String>();
 					newSegment = true;
 				}
@@ -57,8 +57,9 @@ public class BoundaryMap {
 		
 	}
 	
+	//creates the files to be parsed in for boundary map
 	public static void makeBoundaryMap(){
-		CvsParsing.boundsParse();
+		CsvParsing.boundsParse();
 		String prev = "";
 		try {
 			FileWriter write = new FileWriter(new File("resources/bordersNamesCodes.txt"));
@@ -93,6 +94,7 @@ public class BoundaryMap {
 				prev = line;
 			}
 			
+			//city of london needs special handling as it is both a ward and borough
 			write.write("00AA\n");
 			for (String n: cityNeigh) {
 				write.write(n + "\n");

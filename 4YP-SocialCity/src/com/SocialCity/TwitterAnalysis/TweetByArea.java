@@ -34,14 +34,16 @@ public class TweetByArea {
 	public ArrayList<DBObject> getTweetsForBorough(String boroughCode, String tweetName) throws UnknownHostException {
 		BasicDBObject query;
 		String name = codeNameMap.getName(boroughCode);
-		System.out.println(name);
+		//System.out.println(name);
 		ArrayList<DBObject> tweetList = new ArrayList<DBObject>();
 		
+		//set up mongo connection
 		MongoClient mongoClient;
 		mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
 		DBCollection coll = null;
 		
+		//open correct time window database
 		if (tweetName == null) {
 			coll = db.getCollection(CollectionReader.returnName("tweets"));
 		}
@@ -49,16 +51,16 @@ public class TweetByArea {
 			coll = db.getCollection(tweetName);
 		}
 		
-		System.out.println(name);
+		//query tweets for tweets from borough
 		query = new BasicDBObject("place.name", name);
 		DBCursor tweets = coll.find(query);
-		//System.out.println(tweets.count());
-		int count = 0;
+
+		//create list of tweets
 		for (DBObject dbo : tweets) {
 			tweetList.add(dbo);
 		}
 
-		
+		mongoClient.close();
 		return tweetList;
 	}
 	
@@ -84,7 +86,7 @@ public class TweetByArea {
 		return tweetCount;
 	}
 
-	
+	//calculate retweet proportion for areas
 	public HashMap<String, Double> reTweets(String tweetName) throws UnknownHostException {
 		HashMap<String, String> nameMap = codeNameMap.getNameMap();
 		ArrayList<DBObject> list;
@@ -95,6 +97,7 @@ public class TweetByArea {
 		DB db = mongoClient.getDB( "tweetInfo" );
 		DBCollection tweets = db.getCollection("retweets");
 		
+		//get tweets for borough and count number of retweets
 		for (String key : nameMap.keySet()) {
 			if (key.length() == 4) {
 				list = getTweetsForBorough(key, tweetName);
@@ -102,31 +105,35 @@ public class TweetByArea {
 				for (DBObject tweet : list) {
 					if (tweet.containsField("retweeted_status")) {
 						retweetCount++;
-						System.out.println("anything");
+						//System.out.println("anything");
 					}
 				}
+				
+				//avoid divide by 0 error
 				if (total == 0)
 					total = 1;
 				
 				tweetCount.put(key, (double) retweetCount/total);
 			}
 		}
-		
+		mongoClient.close();
 		return tweetCount;
 	}
 	
+	//calculate proportion of tweets per borough and retweet proportions
 	public void tweetProportions(String propName, String tweetName) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient("localhost");
 		DB db = mongoClient.getDB( "tweetInfo" );
 		
-
+		//create proportions database
 		DBCollection tweets = db.createCollection(propName, null);
-
 		HashMap<String, String> nameMap = codeNameMap.getNameMap();
+		//get tweet and retweet proportions
 		HashMap<String, Double> tweetProportion = tweetProportion(tweetName);
 		HashMap<String, Double> retweetProportion = reTweets(tweetName);
 		DBObject proportions;
 		
+		//place proportion objects into database
 		for (String key : nameMap.keySet()) {
 			if (key.length() == 4) {
 				proportions = new BasicDBObject();
@@ -136,7 +143,7 @@ public class TweetByArea {
 				tweets.insert(proportions);
 			}
 		}
-		
+		mongoClient.close();
 	}
 	
 	//create a social factors object for devices
@@ -188,21 +195,26 @@ public class TweetByArea {
 		ArrayList<Word> catsW = new ArrayList<Word>();
 		AreaWords aW;
 		
+		//for each device get tweet collection, format device name create factors and get sentiment 
 		for (String device : devices) {
-			System.out.println("----------");
-			System.out.println(device);
+			
+			//create new device name in standard format
 			String newName = formatDeviceName(device);
 			
 			BasicDBObject query = new BasicDBObject();
+			//get tweets for device
 			query.append("source", device);
 			placeRatio = new HashMap<String, Integer>();
 			results = tweets.find(query);//find all tweets using current device
 			deviceFactors = new SocialFactors(newName.trim());
 			total=0;
+			
 			tw_list = new ArrayList<Tweet_Obj>();
 			
+			//create tweet list of sentiment and count tweets from each location for a device
 			while (results.hasNext()){
 				dbo = (BasicDBObject) results.next();
+				//get location for tweet
 				places = (BasicDBObject) dbo.get("place");
 				placeName = "";
 				if (places != null) {//need to get name for place tweet occured, make sure its a borough
@@ -217,8 +229,10 @@ public class TweetByArea {
 					count = placeRatio.get(placeName);
 			        count++;
 				}
+				//store count for number of tweets from each place for device
 				placeRatio.put(placeName, count);
 				text =  dbo.getString("text");
+				//list of sentiment analysis
 				tw_list.add(new Tweet_Obj(text));
 			}
 			
@@ -234,6 +248,7 @@ public class TweetByArea {
 			double fires = 0;
 			
 			relevant = false;
+			//create social factors for a device - use weighted average
 			for (String k : placeRatio.keySet()) {
 				if (cnm.getCode(k) != null) {
 					query = new BasicDBObject("locations", new BasicDBObject("ward0", cnm.getCode(k).substring(0, 4)));
@@ -252,13 +267,14 @@ public class TweetByArea {
 					fires = fires + (boroughFactors.getDeliberateFires()*count);
 					
 					total=total+count;
-					System.out.println(k);
-					System.out.println(count);
-					System.out.println(total);
-					System.out.println(boroughFactors.getDBObject());
+					////System.out.println(k);
+					////System.out.println(count);
+					////System.out.println(total);
+					////System.out.println(boroughFactors.getDBObject());
 				}
 			}
 			
+			//average the social factors
 			if (relevant) {
 				deviceFactors.setCrimeRate(crimeRate/total);
 				deviceFactors.setGCSEScore(GCSEScore/total);
@@ -270,10 +286,11 @@ public class TweetByArea {
 				deviceFactors.setSchoolAbscences(abscences/total);
 				deviceFactors.setChildInNoWorkHouse(childInNoWork/total);
 				deviceFactors.setDeliberateFires(fires/total);
-				System.out.println(deviceFactors.getDBObject());
 				
+				//find if device object already exists
 				query = new BasicDBObject("locations", new BasicDBObject("ward0", newName));
 				
+				//combine to update object
 				try {
 					combiner = (BasicDBObject) deviceStore.find(query).next();
 				} catch (Exception e) {
@@ -289,27 +306,31 @@ public class TweetByArea {
 				relevant = false;
 			}
 			
+			//analyse tweets
 			resultBlock = ta.analyse_tweets(tw_list);
-
+			
+			//get average sentiment scores
 			act = resultBlock.get_mean_activity();
 			image = resultBlock.get_mean_imagery();
 			valience = resultBlock.get_mean_valience();
-			
+			double frequency = tw_list.size();
 			map = new BasicDBObject ();
 			
+			//create sentiment average object
 			map.put("code", newName);
 			map.put("activation", act);
 			map.put("imagery", image);
 			map.put("pleasantness", valience);
+			map.put("frequency", frequency);
 			
 			newColl.insert(map);
 			
+			//loop through every word list, find statistics for adjectives, nouns, verbs, DAl and catagories
 			adj = resultBlock.get_adjective_stats_freqsorted();
 			noun = resultBlock.get_noun_stats_freqsorted();
 			verb = resultBlock.get_verb_stats_freqsorted();
 			dal = resultBlock.get_DAL_stats_freqsorted();
 			cats = resultBlock.get_Category_stats_freqsorted();
-			System.out.println("Categories: " + cats.size());
 			
 			adjW = new ArrayList<Word>();
 			nounW = new ArrayList<Word>();
@@ -319,6 +340,8 @@ public class TweetByArea {
 			
 			aW = new AreaWords(newName);
 			int i = 0;
+			
+			//limit each list to 10 entries
 			while (i < 10 && i < adj.size()) {
 				adjW.add(new Word(adj.get(i)));
 				i++;
@@ -358,12 +381,14 @@ public class TweetByArea {
 			aW.setDAL(dalW);
 			aW.setCatagories(catsW);
 			
+			//store list of word objects
 			wordStore.insert(aW.getDBObject());
 			
 		}
-		
+		mongoClient.close();
 	}
 	
+	//format device name to be in standard form. No punctuation or white space allowed.
 	public static String formatDeviceName(String source) {
 		if (!source.equals("web")) {
 			source = source.substring(0, source.length() - 4);
@@ -373,6 +398,8 @@ public class TweetByArea {
 			source = source.trim();
 			source = source.replaceAll("\\s+"," ");
 			source = source.replace(" ", "_");
+			
+			//Plume for android needs special formatting
 			if (source.startsWith("Plume")) {
 				source = "Plume_for_Android";
 			}
@@ -380,10 +407,12 @@ public class TweetByArea {
 		return source;
 	}
 
+	//create list of all devices used in system
 	public void createDeviceList(String tweetName, String devListName) throws UnknownHostException {
 		HashSet<String> deviceList = getDevices(tweetName);
 		HashSet<String> deviceListFormatted = new HashSet<String>();
 	
+		//create list of formated device name
 		for (String s : deviceList) {
 			deviceListFormatted.add(formatDeviceName(s));
 		}
@@ -395,7 +424,8 @@ public class TweetByArea {
 		
 		BasicDBObject insert = new BasicDBObject().append("list", deviceListFormatted);
 		coll.insert(insert);
-		System.out.println(insert);
+		mongoClient.close();
+		//System.out.println(insert);
 	}
 	
 	//retrieves all devices used in tweets
@@ -411,6 +441,7 @@ public class TweetByArea {
 			tweets = db.getCollection(tweetName);
 		}
 		
+		//get list of devices for user request
 		DBCursor dBC = tweets.find();
 		CodeNameMap cnm = new CodeNameMap();
 		HashSet<String> devices = new HashSet<String>();
@@ -423,14 +454,16 @@ public class TweetByArea {
 				place = places.getString("name");
 			} catch (Exception e) {continue;}
 			
-			System.out.println(place);
+			//System.out.println(place);
 			if (cnm.getCode(place) != null) {
 				devices.add(deviceName.getString("source"));
 			}
 		}
+		mongoClient.close();
 		return devices;
 	}
 
+	//create the ration of devices used per area
 	public void deviceBreakdown(String tweetName, String devForBoName) throws UnknownHostException {
 		HashMap<String, String> nameMap = codeNameMap.getNameMap();
 		ArrayList<DBObject> list;
@@ -444,7 +477,7 @@ public class TweetByArea {
 		DBCollection coll;
 		
 		coll = db.getCollection(devForBoName);
-		
+		//go through each area and extract all sources used
 		for (String key : nameMap.keySet()) {
 			if (key.length() == 4) {
 				
@@ -456,7 +489,6 @@ public class TweetByArea {
 					source = (String)tweet.get("source");
 					if (!source.equals("web")) {
 						source = formatDeviceName(source);
-						System.out.println(source);
 					}
 					if (sourceCount.containsKey(source)) {
 						count = sourceCount.get(source) + 1;
@@ -470,7 +502,6 @@ public class TweetByArea {
 				for (String source2 : sourceCount.keySet()) {
 					count = sourceCount.get(source2) / list.size();
 					sourceProportion.put(source2, count);
-					System.out.println(source2);
 				}
 				
 				BasicDBObject insertObject = new BasicDBObject();
@@ -479,6 +510,7 @@ public class TweetByArea {
 				coll.insert(insertObject);
 			}
 		}
+		mongoClient.close();
 	}
 	
 }
